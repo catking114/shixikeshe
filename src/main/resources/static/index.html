@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智控后台管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --success-bg: #ecfdf5;
+            --success-text: #059669;
+            --danger-bg: #fef2f2;
+            --danger-text: #dc2626;
+            --warning-bg: #fffbeb;
+            --warning-text: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 40px 0;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .page-header h3 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-success {
+            background-color: var(--success-text);
+            color: white;
+        }
+        .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-action {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .btn-action:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #f1f5f9;
+        }
+        .btn-action.danger:hover {
+            border-color: var(--danger-text);
+            color: var(--danger-text);
+            background: var(--danger-bg);
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            display: inline-flex;
+            gap: 4px;
+            margin-bottom: 24px !important;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 8px 20px;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs .nav-link:hover { color: var(--text-main); background: rgba(255,255,255,0.5); }
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .table {
+            margin-bottom: 0;
+            --bs-table-hover-bg: #f8fafc;
+        }
+        .table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            border-top: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+        .table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-color: var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .table-hover tbody tr:hover { background-color: #f8fafc; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-on { background: var(--success-bg); color: var(--success-text); }
+        .status-off { background: var(--danger-bg); color: var(--danger-text); }
+        .badge-read { background: var(--success-bg); color: var(--success-text); }
+        .badge-unread { background: var(--danger-bg); color: var(--danger-text); }
+
+        .btn-confirm {
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        .btn-confirm:hover { background: var(--primary-hover); }
+
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 24px;
+        }
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--bg-color);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 400px;
+            max-width: 90vw;
+        }
+        .auth-card h2 { font-weight: 700; margin-bottom: 8px; }
+        .auth-card .subtitle { color: var(--text-secondary); margin-bottom: 28px; font-size: 0.9rem; }
+        .auth-card .form-label { font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; }
+        .auth-card .btn-primary { width: 100%; padding: 12px; font-weight: 600; }
+        .auth-card .auth-switch { text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem; }
+        .auth-card .auth-switch a { color: var(--primary-color); cursor: pointer; font-weight: 600; text-decoration: none; }
+        .auth-card .auth-switch a:hover { text-decoration: underline; }
+        .auth-card .alert { display: none; margin-bottom: 16px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; }
+        .auth-card .alert.show { display: block; }
+        .auth-card .form-check-label { font-size: 0.9rem; color: var(--text-main); }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-info .badge-role { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+        .badge-admin { background: #eef2ff; color: #4f46e5; }
+        .badge-user { background: #f0fdf4; color: #16a34a; }
+
+        .table-responsive { border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+        .table-responsive .table { margin-bottom: 0; }
+
+        @media (max-width: 768px) {
+            body { padding: 16px 0; }
+            .container { padding-left: 12px; padding-right: 12px; }
+            .card.p-4 { padding: 16px !important; }
+            .page-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+            .page-header h3 { font-size: 1.2rem; }
+            .page-header .d-flex { width: 100%; }
+            .page-header .d-flex.gap-3 { flex-direction: column; align-items: flex-start !important; gap: 8px !important; }
+            .user-info { width: 100%; justify-content: space-between; }
+            #adminActions { width: 100%; }
+            #adminActions .btn { flex: 1; font-size: 0.85rem; padding: 10px 12px; }
+            .nav-tabs { overflow-x: auto; flex-wrap: nowrap; gap: 0; width: 100%; padding: 4px 0; -webkit-overflow-scrolling: touch; }
+            .nav-tabs .nav-link { white-space: nowrap; padding: 8px 14px; font-size: 0.85rem; flex-shrink: 0; }
+            .table thead { display: none; }
+            .table tbody tr { display: block; padding: 16px; margin-bottom: 12px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 !important; border: none !important; font-size: 0.85rem; }
+            .table tbody td:not(:last-child) { border-bottom: 1px solid var(--border-color) !important; }
+            .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 12px; flex-shrink: 0; }
+            .table tbody td:empty { display: none; }
+            .table tbody .empty-state td { display: block; text-align: center; }
+            .table tbody .empty-state td::before { display: none; }
+            .auth-card { padding: 24px 20px !important; }
+            .auth-card h2 { font-size: 1.3rem; }
+            .modal-dialog { margin: 8px; }
+            .modal-body { padding: 16px !important; }
+            .modal-header { padding: 14px 16px !important; }
+            .modal-footer { padding: 12px 16px !important; }
+            .btn { padding: 10px 14px; }
+            .status-badge { font-size: 0.7rem; padding: 3px 8px; }
+            .progress { width: 40px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+        <div class="alert alert-danger" id="authAlert"></div>
+        <h2 id="authTitle">登录</h2>
+        <p class="subtitle" id="authSubtitle">登录以管理您的智能设备</p>
+        <form id="authForm" onsubmit="return false;">
+            <div class="mb-3">
+                <label class="form-label">用户名</label>
+                <input type="text" class="form-control" id="authUsername" required>
+            </div>
+            <div class="mb-3" id="emailField">
+                <label class="form-label">邮箱</label>
+                <input type="email" class="form-control" id="authEmail">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-control" id="authPassword" required>
+            </div>
+            <div class="mb-3 form-check" id="roleField">
+                <input type="checkbox" class="form-check-input" id="authAdmin">
+                <label class="form-check-label" for="authAdmin">注册为管理员</label>
+            </div>
+            <button type="button" class="btn btn-primary" id="authBtn" onclick="handleAuth()">登录</button>
+        </form>
+        <div class="auth-switch">
+            <span id="authSwitchText">还没有账号？</span>
+            <a id="authSwitchLink" onclick="toggleAuthMode()">立即注册</a>
+        </div>
+    </div>
+</div>
+
+<div id="mainApp" style="display:none;">
+<div class="container">
+    <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+            <h3><i class="bi bi-house-door-fill" style="color: var(--primary-color);"></i> 智控后台</h3>
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-info" id="userInfo">
+                    <span id="userDisplayName"></span>
+                    <span class="badge-role" id="userRoleBadge"></span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="logout()">退出</button>
+                </div>
+                <div class="d-flex gap-2" id="adminActions">
+                    <button class="btn btn-primary" onclick="openAddModal()"><i class="bi bi-plus-lg me-1"></i>添加设备</button>
+                    <button class="btn btn-success" onclick="openAddUserModal()"><i class="bi bi-person-plus me-1"></i>添加用户</button>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="device-tab" data-bs-toggle="tab" data-bs-target="#device-pane" type="button">
+                    <i class="bi bi-cpu me-1"></i>设备管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="log-tab" data-bs-toggle="tab" data-bs-target="#log-pane" type="button">
+                    <i class="bi bi-journal-text me-1"></i>操作日志
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-pane" type="button" onclick="loadUsers()">
+                    <i class="bi bi-people me-1"></i>用户管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-pane" type="button" onclick="loadNotifications()">
+                    <i class="bi bi-bell me-1"></i>消息通知
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="device-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>品牌</th>
+                        <th>类型</th>
+                        <th>位置</th>
+                        <th>电量</th>
+                        <th>状态</th>
+                        <th style="width: 140px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="deviceTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="log-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>设备ID</th>
+                        <th>指令</th>
+                        <th style="width: 80px;">操作</th>
+                        <th>参数</th>
+                        <th>操作时间</th>
+                    </tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="user-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>创建时间</th>
+                        <th style="width: 140px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="notification-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户ID</th>
+                        <th>设备ID</th>
+                        <th>消息内容</th>
+                        <th>状态</th>
+                        <th>时间</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="notificationTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deviceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalTitle">添加设备</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deviceForm">
+                    <input type="hidden" id="deviceId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">品牌</label>
+                        <input type="text" class="form-control" id="brand" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">名称</label>
+                        <input type="text" class="form-control" id="deviceName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">类型</label>
+                        <select class="form-select" id="deviceType">
+                            <option value="Light">灯光</option>
+                            <option value="Sensor">传感器</option>
+                            <option value="Switch">开关</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">位置</label>
+                        <input type="text" class="form-control" id="roomLocation" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">电量(%)</label>
+                            <input type="number" class="form-control" id="batteryLevel" value="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">状态</label>
+                            <select class="form-select" id="status">
+                                <option value="1">开启</option>
+                                <option value="0">关闭</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveDevice()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="userModalTitle">添加用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">用户名</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">邮箱</label>
+                        <input type="email" class="form-control" id="userEmail" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_BASE = '/api/devices';
+    const NOTIFICATION_API_BASE = '/api/notifications';
+    const AUTH_BASE = '/api/auth';
+    const USER_BASE = '/api/users';
+    let modalInstance;
+    let userModalInstance;
+    let currentUser = null;
+    let isLoginMode = true;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalInstance = new bootstrap.Modal(document.getElementById('deviceModal'));
+        userModalInstance = new bootstrap.Modal(document.getElementById('userModal'));
+        checkAuth();
+    });
+
+    async function checkAuth() {
+        try {
+            const res = await fetch(`${AUTH_BASE}/me`);
+            const data = await res.json();
+            if (data.authenticated) {
+                currentUser = data;
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userDisplayName').innerHTML = `<i class="bi bi-person-circle me-1"></i>${data.username}`;
+                const badge = document.getElementById('userRoleBadge');
+                if (data.role === 'ADMIN') {
+                    badge.className = 'badge-role badge-admin';
+                    badge.textContent = '管理员';
+                    document.getElementById('adminActions').style.display = 'flex';
+                } else {
+                    badge.className = 'badge-role badge-user';
+                    badge.textContent = '普通用户';
+                    document.getElementById('adminActions').style.display = 'none';
+                }
+                loadDevices();
+                loadLogs();
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('authTitle').textContent = isLoginMode ? '登录' : '注册';
+        document.getElementById('authSubtitle').textContent = isLoginMode ? '登录以管理您的智能设备' : '创建账号以开始使用';
+        document.getElementById('authBtn').textContent = isLoginMode ? '登录' : '注册';
+        document.getElementById('authSwitchText').textContent = isLoginMode ? '还没有账号？' : '已有账号？';
+        document.getElementById('authSwitchLink').textContent = isLoginMode ? '立即注册' : '立即登录';
+        document.getElementById('emailField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('roleField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('authAlert').className = 'alert alert-danger';
+        document.getElementById('authAlert').textContent = '';
+    }
+
+    async function handleAuth() {
+        const username = document.getElementById('authUsername').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const alertEl = document.getElementById('authAlert');
+        alertEl.className = 'alert alert-danger';
+        alertEl.textContent = '';
+
+        if (!username || !password) {
+            alertEl.textContent = '用户名和密码不能为空';
+            alertEl.classList.add('show');
+            return;
+        }
+
+        try {
+            if (isLoginMode) {
+                const res = await fetch(`${AUTH_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alertEl.textContent = data.error || '登录失败';
+                    alertEl.classList.add('show');
+                    return;
+                }
+            } else {
+                const email = document.getElementById('authEmail').value.trim();
+                if (!email) {
+                    alertEl.textContent = '邮箱不能为空';
+                    alertEl.classList.add('show');
+                    return;
+                }
+                const role = document.getElementById('authAdmin').checked ? 'ADMIN' : 'USER';
+                const res = await fetch(`${AUTH_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, email, role })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    alertEl.textContent = data.error || '注册失败';
+                    alertEl.classList.add('show');
+                    return;
+                }
+            }
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+            checkAuth();
+        } catch (e) {
+            document.getElementById('authAlert').textContent = '网络错误';
+            document.getElementById('authAlert').classList.add('show');
+        }
+    }
+
+    async function logout() {
+        await fetch(`${AUTH_BASE}/logout`, { method: 'POST' });
+        currentUser = null;
+        document.getElementById('authOverlay').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
+        isLoginMode = true;
+        toggleAuthMode();
+    }
+
+    function isAdmin() {
+        return currentUser && currentUser.role === 'ADMIN';
+    }
+
+    async function loadDevices() {
+        try {
+            const res = await fetch(API_BASE);
+            const data = await res.json();
+            const tbody = document.getElementById('deviceTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-inbox d-block"></i>暂无设备数据</td></tr>';
+                return;
+            }
+            data.forEach(device => {
+                const statusHtml = device.status === 1
+                    ? '<span class="status-badge status-on"><i class="bi bi-check-circle-fill"></i> 开启</span>'
+                    : '<span class="status-badge status-off"><i class="bi bi-x-circle-fill"></i> 关闭</span>';
+                const actions = isAdmin()
+                    ? `<div class="d-flex gap-1">
+                        <button class="btn btn-action" onclick='editDevice(${JSON.stringify(device)})'><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-action danger" onclick="deleteDevice(${device.id})"><i class="bi bi-trash3"></i></button>
+                       </div>`
+                    : '<span class="text-muted small">只读</span>';
+                tbody.innerHTML += `
+                    <tr>
+                        <td data-label="ID" class="text-secondary">#${device.id}</td>
+                        <td data-label="名称" class="fw-semibold">${device.deviceName}</td>
+                        <td data-label="品牌">${device.brand}</td>
+                        <td data-label="类型"><span class="badge bg-light text-dark border">${device.deviceType}</span></td>
+                        <td data-label="位置">${device.roomLocation}</td>
+                        <td data-label="电量">
+                            <div class="d-flex align-items-center gap-2" style="justify-content:flex-end">
+                                <div class="progress flex-grow-1" style="height:6px;width:60px;border-radius:3px;">
+                                    <div class="progress-bar ${device.batteryLevel < 20 ? 'bg-danger' : 'bg-success'}" style="width:${device.batteryLevel}%"></div>
+                                </div>
+                                <span class="small text-secondary">${device.batteryLevel}%</span>
+                            </div>
+                        </td>
+                        <td data-label="状态">${statusHtml}</td>
+                        <td data-label="操作">${actions}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error("加载失败", e);
+        }
+    }
+
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = '添加设备';
+        document.getElementById('deviceForm').reset();
+        document.getElementById('deviceId').value = '';
+        modalInstance.show();
+    }
+
+    function editDevice(device) {
+        document.getElementById('modalTitle').innerText = '编辑设备';
+        document.getElementById('deviceId').value = device.id;
+        document.getElementById('brand').value = device.brand;
+        document.getElementById('deviceName').value = device.deviceName;
+        document.getElementById('deviceType').value = device.deviceType;
+        document.getElementById('roomLocation').value = device.roomLocation;
+        document.getElementById('batteryLevel').value = device.batteryLevel;
+        document.getElementById('status').value = device.status;
+        modalInstance.show();
+    }
+
+    async function saveDevice() {
+        const id = document.getElementById('deviceId').value;
+        const isEdit = !!id;
+        const payload = {
+            deviceName: document.getElementById('deviceName').value,
+            brand: document.getElementById('brand').value,
+            deviceType: document.getElementById('deviceType').value,
+            roomLocation: document.getElementById('roomLocation').value,
+            batteryLevel: parseInt(document.getElementById('batteryLevel').value),
+            status: parseInt(document.getElementById('status').value),
+            createTime: new Date().toISOString()
+        };
+        if(isEdit) payload.id = parseInt(id);
+        const url = isEdit ? `${API_BASE}/${id}` : API_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                modalInstance.hide();
+                loadDevices();
+                loadLogs();
+                alert(isEdit ? '修改成功' : '添加成功');
+            } else {
+                const err = await res.json();
+                alert('操作失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    async function deleteDevice(id) {
+        if(!confirm('确定删除吗？')) return;
+        try {
+            const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadDevices();
+                loadLogs();
+            } else {
+                const err = await res.json();
+                alert('删除失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    async function loadLogs() {
+        try {
+            const res = await fetch(`${API_BASE}/logs`);
+            const data = await res.json();
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="bi bi-journal-x d-block"></i>暂无操作日志</td></tr>';
+                return;
+            }
+            const undoableCommands = ['CREATE_DEVICE', 'UPDATE_DEVICE', 'DELETE_DEVICE'];
+            data.forEach(log => {
+                const canUndo = undoableCommands.includes(log.command) && isAdmin();
+                tbody.innerHTML += `
+                    <tr>
+                        <td data-label="ID" class="text-secondary">#${log.id}</td>
+                        <td data-label="设备ID">${log.deviceId}</td>
+                        <td data-label="指令"><code class="bg-light px-2 py-1 rounded text-dark">${log.command}</code></td>
+                        <td data-label="操作">
+                            ${canUndo ? `<button class="btn btn-action" onclick="undoLog(${log.id})"><i class="bi bi-arrow-counterclockwise"></i></button>` : '<span class="text-muted small">-</span>'}
+                        </td>
+                        <td data-label="参数">${log.params || '<span class="text-muted">-</span>'}</td>
+                        <td data-label="操作时间" class="text-secondary small">${log.operateTime.replace('T', ' ')}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    async function undoLog(logId) {
+        if (!confirm('确定要撤销此操作吗？')) return;
+        try {
+            const res = await fetch(`${API_BASE}/undo/${logId}`, { method: 'POST' });
+            if (res.ok) {
+                alert('撤销成功');
+                loadDevices();
+                loadLogs();
+            } else {
+                const err = await res.json();
+                alert('撤销失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    function openAddUserModal() {
+        document.getElementById('userModalTitle').innerText = '添加用户';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        userModalInstance.show();
+    }
+
+    function editUser(user) {
+        document.getElementById('userModalTitle').innerText = '编辑用户';
+        document.getElementById('userId').value = user.id;
+        document.getElementById('username').value = user.username;
+        document.getElementById('userEmail').value = user.email;
+        userModalInstance.show();
+    }
+
+    async function saveUser() {
+        const id = document.getElementById('userId').value;
+        const isEdit = !!id;
+        const payload = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('userEmail').value,
+            createTime: new Date().toISOString()
+        };
+        if (isEdit) payload.id = parseInt(id);
+        const url = isEdit ? `${USER_BASE}/${id}` : USER_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                userModalInstance.hide();
+                loadUsers();
+                alert(isEdit ? '修改成功' : '添加成功');
+            } else {
+                const err = await res.json();
+                alert('操作失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    async function loadUsers() {
+        try {
+            const res = await fetch(USER_BASE);
+            if (res.status === 403) {
+                document.getElementById('userTableBody').innerHTML = '<tr><td colspan="5" class="empty-state text-danger">无权限查看用户列表</td></tr>';
+                return;
+            }
+            if (!res.ok) throw new Error('加载失败');
+            const data = await res.json();
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-people d-block"></i>暂无用户数据</td></tr>';
+                return;
+            }
+            data.forEach(user => {
+                const time = user.createTime ? user.createTime.replace('T', ' ') : '未知时间';
+                const actions = isAdmin()
+                    ? `<div class="d-flex gap-1">
+                        <button class="btn btn-action" onclick='editUser(${JSON.stringify(user)})'><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-action danger" onclick="deleteUser(${user.id})"><i class="bi bi-trash3"></i></button>
+                       </div>`
+                    : '<span class="text-muted small">只读</span>';
+                tbody.innerHTML += `
+                    <tr>
+                        <td data-label="ID" class="text-secondary">#${user.id}</td>
+                        <td data-label="用户名" class="fw-semibold">${user.username}</td>
+                        <td data-label="邮箱">${user.email}</td>
+                        <td data-label="创建时间" class="text-secondary small">${time}</td>
+                        <td data-label="操作">${actions}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error("加载用户失败", e);
+            document.getElementById('userTableBody').innerHTML = `<tr><td colspan="5" class="empty-state text-danger">加载失败: ${e.message}</td></tr>`;
+        }
+    }
+
+    async function deleteUser(id) {
+        if(!confirm('确定删除该用户吗？')) return;
+        try {
+            const res = await fetch(`${USER_BASE}/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                loadUsers();
+            } else {
+                const err = await res.json();
+                alert('删除失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) {
+            alert('网络错误');
+        }
+    }
+
+    async function loadNotifications() {
+        try {
+            const res = await fetch(`${API_BASE}/notifications`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const data = await res.json();
+            const tbody = document.getElementById('notificationTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-bell-slash d-block"></i>暂无通知消息</td></tr>';
+                return;
+            }
+            data.forEach(notif => {
+                const time = notif.createTime ? notif.createTime.replace('T', ' ') : '未知时间';
+                const isUnread = notif.isRead == 0;
+                const statusText = isUnread ? '未读' : '已读';
+                const badgeClass = isUnread ? 'badge-unread' : 'badge-read';
+                const statusIcon = isUnread ? 'bi-envelope-fill' : 'bi-envelope-open';
+
+                const actionBtn = isUnread && isAdmin()
+                    ? `<button class="btn btn-confirm" onclick="markAsRead(${notif.id}, this)"><i class="bi bi-check2 me-1"></i>确认</button>`
+                    : `<span class="text-muted small"><i class="bi bi-check-circle me-1"></i>${isUnread ? '待确认' : '已确认'}</span>`;
+
+                tbody.innerHTML += `
+                    <tr id="notif-row-${notif.id}" style="${isUnread ? 'background:#fafbff;' : ''}">
+                        <td data-label="ID" class="text-secondary">#${notif.id}</td>
+                        <td data-label="用户ID">${notif.userId || '<span class="text-muted">系统</span>'}</td>
+                        <td data-label="设备ID">${notif.deviceId}</td>
+                        <td data-label="消息内容" style="max-width:300px;">${notif.messageContent}</td>
+                        <td data-label="状态"><span class="status-badge ${badgeClass}" id="notif-badge-${notif.id}"><i class="bi ${statusIcon}"></i> ${statusText}</span></td>
+                        <td data-label="时间" class="text-secondary small">${time}</td>
+                        <td data-label="操作">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error("加载消息失败", e);
+            document.getElementById('notificationTableBody').innerHTML = `<tr><td colspan="7" class="empty-state text-danger">加载失败: ${e.message}</td></tr>`;
+        }
+    }
+
+    async function markAsRead(id, btnElement) {
+        try {
+            const res = await fetch(`${NOTIFICATION_API_BASE}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isRead: 1 })
+            });
+            if (res.ok || res.status === 204) {
+                const badge = document.getElementById(`notif-badge-${id}`);
+                if (badge) {
+                    badge.className = 'status-badge badge-read';
+                    badge.innerHTML = '<i class="bi bi-envelope-open"></i> 已读';
+                }
+                const row = document.getElementById(`notif-row-${id}`);
+                if (row) row.style.background = '';
+                if (btnElement) {
+                    const span = document.createElement('span');
+                    span.className = 'text-muted small';
+                    span.innerHTML = '<i class="bi bi-check-circle me-1"></i>已确认';
+                    btnElement.parentNode.replaceChild(span, btnElement);
+                }
+            } else {
+                const err = await res.json();
+                alert('确认失败: ' + (err.error || '请重试'));
+            }
+        } catch (e) {
+            console.error("标记已读失败", e);
+            alert('网络错误，无法确认');
+        }
+    }
+</script>
+</body>
+</html>
