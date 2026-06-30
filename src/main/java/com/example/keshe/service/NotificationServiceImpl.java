@@ -3,6 +3,8 @@ package com.example.keshe.service;
 import com.example.keshe.entity.Notification;
 import com.example.keshe.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +24,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Notification> findAll() {
-        return notificationRepository.findAll();
+    public Page<Notification> findAll(Pageable pageable) {
+        return notificationRepository.findAll(pageable);
     }
 
     @Override

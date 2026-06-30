@@ -3,6 +3,9 @@ package com.example.keshe.service;
 import com.example.keshe.entity.OperationLog;
 import com.example.keshe.repository.OperationLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +51,8 @@ public class OperationLogServiceImpl implements OperationLogService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OperationLog> findAll() {
-        return logRepository.findAll(Sort.by(Sort.Direction.DESC, "operateTime"));
+    public Page<OperationLog> findAll(Pageable pageable) {
+        PageRequest pr = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "operateTime"));
+        return logRepository.findAll(pr);
     }
 }

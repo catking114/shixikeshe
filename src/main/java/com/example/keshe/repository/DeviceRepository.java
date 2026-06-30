@@ -1,7 +1,11 @@
 package com.example.keshe.repository;
 
 import com.example.keshe.entity.Device;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,4 +16,15 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     List<Device> findByBrand(String brand);
 
     List<Device> findByRoomLocation(String roomLocation);
+
+    @Query("SELECT d FROM Device d WHERE " +
+           "(:brand IS NULL OR d.brand = :brand) AND " +
+           "(:deviceType IS NULL OR d.deviceType = :deviceType) AND " +
+           "(:status IS NULL OR d.status = :status) AND " +
+           "(:keyword IS NULL OR d.deviceName LIKE %:keyword% OR d.roomLocation LIKE %:keyword%)")
+    Page<Device> searchDevices(@Param("brand") String brand,
+                               @Param("deviceType") String deviceType,
+                               @Param("status") Integer status,
+                               @Param("keyword") String keyword,
+                               Pageable pageable);
 }

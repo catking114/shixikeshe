@@ -321,12 +321,12 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-pane" type="button" onclick="loadUsers()">
+                <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-pane" type="button" onclick="loadUsers(0)">
                     <i class="bi bi-people me-1"></i>用户管理
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-pane" type="button" onclick="loadNotifications()">
+                <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-pane" type="button" onclick="loadNotifications(0)">
                     <i class="bi bi-bell me-1"></i>消息通知
                 </button>
             </li>
@@ -334,6 +334,37 @@
 
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="device-pane" role="tabpanel">
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-end">
+                    <div class="flex-grow-1" style="min-width:160px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">搜索</label>
+                        <input type="text" class="form-control form-control-sm" id="searchKeyword" placeholder="设备名称 / 位置...">
+                    </div>
+                    <div style="min-width:130px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">品牌</label>
+                        <select class="form-select form-select-sm" id="filterBrand"></select>
+                    </div>
+                    <div style="min-width:110px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">类型</label>
+                        <select class="form-select form-select-sm" id="filterType">
+                            <option value="">全部类型</option>
+                            <option value="Light">灯光</option>
+                            <option value="Sensor">传感器</option>
+                            <option value="Switch">开关</option>
+                        </select>
+                    </div>
+                    <div style="min-width:110px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">状态</label>
+                        <select class="form-select form-select-sm" id="filterStatus">
+                            <option value="">全部状态</option>
+                            <option value="1">开启</option>
+                            <option value="0">关闭</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="applyFilter()"><i class="bi bi-search me-1"></i>搜索</button>
+                        <button class="btn btn-light btn-sm" onclick="resetFilter()"><i class="bi bi-arrow-counterclockwise me-1"></i>重置</button>
+                    </div>
+                </div>
                 <table class="table table-hover align-middle">
                     <thead>
                     <tr>
@@ -349,6 +380,7 @@
                     </thead>
                     <tbody id="deviceTableBody"></tbody>
                 </table>
+                <div id="devicePagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
             </div>
 
             <div class="tab-pane fade" id="log-pane" role="tabpanel">
@@ -365,6 +397,7 @@
                     </thead>
                     <tbody id="logTableBody"></tbody>
                 </table>
+                <div id="logPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
             </div>
 
             <div class="tab-pane fade" id="user-pane" role="tabpanel">
@@ -380,6 +413,7 @@
                     </thead>
                     <tbody id="userTableBody"></tbody>
                 </table>
+                <div id="userPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
             </div>
 
             <div class="tab-pane fade" id="notification-pane" role="tabpanel">
@@ -397,6 +431,7 @@
                     </thead>
                     <tbody id="notificationTableBody"></tbody>
                 </table>
+                <div id="notificationPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
             </div>
         </div>
     </div>
@@ -414,7 +449,10 @@
                     <input type="hidden" id="deviceId">
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-semibold">品牌</label>
-                        <input type="text" class="form-control" id="brand" required>
+                        <select class="form-select" id="brand" onchange="toggleCustomBrand()" required>
+                            <option value="" disabled selected>请选择品牌</option>
+                        </select>
+                        <input type="text" class="form-control mt-2" id="customBrand" placeholder="请输入自定义品牌名称" style="display:none;">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-semibold">名称</label>
@@ -494,10 +532,105 @@
     let userModalInstance;
     let currentUser = null;
     let isLoginMode = true;
+    const PAGE_SIZE = 8;
+    let devicePage = 0, logPage = 0, userPage = 0, notifPage = 0;
+
+    const BRAND_LIST = [
+        '小米(Xiaomi)', '华为(Huawei)', '美的(Midea)', '海尔(Haier)', '格力(Gree)',
+        'Aqara(绿米)', 'Yeelight', 'Sonoff', '涂鸦智能(Tuya)', '欧瑞博(ORVIBO)',
+        '萤石(EZVIZ)', '乐橙(Imou)', '公牛(BULL)', 'TP-Link', 'Philips Hue',
+        'Samsung SmartThings', 'Google Nest', 'Amazon Echo', 'Sonos', '博世(Bosch)',
+        '松下(Panasonic)', '戴森(Dyson)', '石头(Roborock)', '追觅(Dreame)', '云鲸(NARWAL)'
+    ];
+
+    function renderPagination(containerId, pageData, loadFn) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        const { number, totalPages, totalElements } = pageData;
+        if (totalPages <= 1 && totalElements <= PAGE_SIZE) {
+            el.innerHTML = `<span class="text-muted small">共 ${totalElements} 条</span>`;
+            return;
+        }
+        const prevDisabled = number <= 0;
+        const nextDisabled = number >= totalPages - 1;
+        el.innerHTML = `
+            <span class="text-muted small">共 ${totalElements} 条</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0" style="gap:2px">
+                    <li class="page-item ${prevDisabled ? 'disabled' : ''}">
+                        <a class="page-link border rounded" style="cursor:pointer" onclick="${prevDisabled ? '' : loadFn + '(' + (number - 1) + ')'}">上一页</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link border-0 text-dark">第 ${number + 1}/${totalPages} 页</span>
+                    </li>
+                    <li class="page-item ${nextDisabled ? 'disabled' : ''}">
+                        <a class="page-link border rounded" style="cursor:pointer" onclick="${nextDisabled ? '' : loadFn + '(' + (number + 1) + ')'}">下一页</a>
+                    </li>
+                </ul>
+            </nav>`;
+    }
+
+    function populateBrandDropdowns() {
+        const filterBrand = document.getElementById('filterBrand');
+        const modalBrand = document.getElementById('brand');
+
+        filterBrand.innerHTML = '<option value="">全部品牌</option>';
+        modalBrand.innerHTML = '<option value="" disabled selected>请选择品牌</option>';
+
+        BRAND_LIST.forEach(brand => {
+            filterBrand.innerHTML += `<option value="${brand}">${brand}</option>`;
+            modalBrand.innerHTML += `<option value="${brand}">${brand}</option>`;
+        });
+
+        modalBrand.innerHTML += '<option value="__custom__">自定义品牌...</option>';
+    }
+
+    function toggleCustomBrand() {
+        const brandSelect = document.getElementById('brand');
+        const customBrandInput = document.getElementById('customBrand');
+        if (brandSelect.value === '__custom__') {
+            customBrandInput.style.display = 'block';
+            customBrandInput.required = true;
+        } else {
+            customBrandInput.style.display = 'none';
+            customBrandInput.required = false;
+            customBrandInput.value = '';
+        }
+    }
+
+    function applyFilter() {
+        loadDevices(0);
+    }
+
+    function resetFilter() {
+        document.getElementById('searchKeyword').value = '';
+        document.getElementById('filterBrand').value = '';
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterStatus').value = '';
+        loadDevices(0);
+    }
+
+    function getFilterParams() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        const brand = document.getElementById('filterBrand').value;
+        const deviceType = document.getElementById('filterType').value;
+        const status = document.getElementById('filterStatus').value;
+
+        let params = `page=${devicePage}&size=${PAGE_SIZE}`;
+        if (keyword) params += `&keyword=${encodeURIComponent(keyword)}`;
+        if (brand) params += `&brand=${encodeURIComponent(brand)}`;
+        if (deviceType) params += `&deviceType=${encodeURIComponent(deviceType)}`;
+        if (status !== '') params += `&status=${status}`;
+        return params;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         modalInstance = new bootstrap.Modal(document.getElementById('deviceModal'));
         userModalInstance = new bootstrap.Modal(document.getElementById('userModal'));
+        populateBrandDropdowns();
+        document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') applyFilter();
+        });
         checkAuth();
     });
 
@@ -609,14 +742,18 @@
         return currentUser && currentUser.role === 'ADMIN';
     }
 
-    async function loadDevices() {
+    async function loadDevices(p) {
+        if (p !== undefined) devicePage = p;
         try {
-            const res = await fetch(API_BASE);
-            const data = await res.json();
+            const params = getFilterParams();
+            const res = await fetch(`${API_BASE}?${params}`);
+            const result = await res.json();
+            const data = result.content;
             const tbody = document.getElementById('deviceTableBody');
             tbody.innerHTML = '';
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-inbox d-block"></i>暂无设备数据</td></tr>';
+                renderPagination('devicePagination', result, 'loadDevices');
                 return;
             }
             data.forEach(device => {
@@ -649,6 +786,7 @@
                     </tr>
                 `;
             });
+            renderPagination('devicePagination', result, 'loadDevices');
         } catch (e) {
             console.error("加载失败", e);
         }
@@ -658,27 +796,55 @@
         document.getElementById('modalTitle').innerText = '添加设备';
         document.getElementById('deviceForm').reset();
         document.getElementById('deviceId').value = '';
+        document.getElementById('customBrand').style.display = 'none';
+        document.getElementById('customBrand').value = '';
+        document.getElementById('brand').value = '';
         modalInstance.show();
     }
 
     function editDevice(device) {
         document.getElementById('modalTitle').innerText = '编辑设备';
         document.getElementById('deviceId').value = device.id;
-        document.getElementById('brand').value = device.brand;
         document.getElementById('deviceName').value = device.deviceName;
         document.getElementById('deviceType').value = device.deviceType;
         document.getElementById('roomLocation').value = device.roomLocation;
         document.getElementById('batteryLevel').value = device.batteryLevel;
         document.getElementById('status').value = device.status;
+
+        const brandSelect = document.getElementById('brand');
+        const customBrandInput = document.getElementById('customBrand');
+        const brandOptions = Array.from(brandSelect.options).map(o => o.value);
+
+        if (brandOptions.includes(device.brand)) {
+            brandSelect.value = device.brand;
+            customBrandInput.style.display = 'none';
+            customBrandInput.value = '';
+        } else {
+            brandSelect.value = '__custom__';
+            customBrandInput.style.display = 'block';
+            customBrandInput.value = device.brand;
+        }
+
         modalInstance.show();
     }
 
     async function saveDevice() {
         const id = document.getElementById('deviceId').value;
         const isEdit = !!id;
+
+        const brandSelect = document.getElementById('brand');
+        let brandValue = brandSelect.value;
+        if (brandValue === '__custom__') {
+            brandValue = document.getElementById('customBrand').value.trim();
+            if (!brandValue) {
+                alert('请输入自定义品牌名称');
+                return;
+            }
+        }
+
         const payload = {
             deviceName: document.getElementById('deviceName').value,
-            brand: document.getElementById('brand').value,
+            brand: brandValue,
             deviceType: document.getElementById('deviceType').value,
             roomLocation: document.getElementById('roomLocation').value,
             batteryLevel: parseInt(document.getElementById('batteryLevel').value),
@@ -724,14 +890,17 @@
         }
     }
 
-    async function loadLogs() {
+    async function loadLogs(p) {
+        if (p !== undefined) logPage = p;
         try {
-            const res = await fetch(`${API_BASE}/logs`);
-            const data = await res.json();
+            const res = await fetch(`${API_BASE}/logs?page=${logPage}&size=${PAGE_SIZE}`);
+            const result = await res.json();
+            const data = result.content;
             const tbody = document.getElementById('logTableBody');
             tbody.innerHTML = '';
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="bi bi-journal-x d-block"></i>暂无操作日志</td></tr>';
+                renderPagination('logPagination', result, 'loadLogs');
                 return;
             }
             const undoableCommands = ['CREATE_DEVICE', 'UPDATE_DEVICE', 'DELETE_DEVICE'];
@@ -750,6 +919,7 @@
                     </tr>
                 `;
             });
+            renderPagination('logPagination', result, 'loadLogs');
         } catch (e) {
             console.log(e);
         }
@@ -817,19 +987,23 @@
         }
     }
 
-    async function loadUsers() {
+    async function loadUsers(p) {
+        if (p !== undefined) userPage = p;
         try {
-            const res = await fetch(USER_BASE);
+            const res = await fetch(`${USER_BASE}?page=${userPage}&size=${PAGE_SIZE}`);
             if (res.status === 403) {
                 document.getElementById('userTableBody').innerHTML = '<tr><td colspan="5" class="empty-state text-danger">无权限查看用户列表</td></tr>';
+                document.getElementById('userPagination').innerHTML = '';
                 return;
             }
             if (!res.ok) throw new Error('加载失败');
-            const data = await res.json();
+            const result = await res.json();
+            const data = result.content;
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-people d-block"></i>暂无用户数据</td></tr>';
+                renderPagination('userPagination', result, 'loadUsers');
                 return;
             }
             data.forEach(user => {
@@ -850,6 +1024,7 @@
                     </tr>
                 `;
             });
+            renderPagination('userPagination', result, 'loadUsers');
         } catch (e) {
             console.error("加载用户失败", e);
             document.getElementById('userTableBody').innerHTML = `<tr><td colspan="5" class="empty-state text-danger">加载失败: ${e.message}</td></tr>`;
@@ -871,15 +1046,18 @@
         }
     }
 
-    async function loadNotifications() {
+    async function loadNotifications(p) {
+        if (p !== undefined) notifPage = p;
         try {
-            const res = await fetch(`${API_BASE}/notifications`);
+            const res = await fetch(`${API_BASE}/notifications?page=${notifPage}&size=${PAGE_SIZE}`);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            const data = await res.json();
+            const result = await res.json();
+            const data = result.content;
             const tbody = document.getElementById('notificationTableBody');
             tbody.innerHTML = '';
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-bell-slash d-block"></i>暂无通知消息</td></tr>';
+                renderPagination('notificationPagination', result, 'loadNotifications');
                 return;
             }
             data.forEach(notif => {
@@ -905,6 +1083,7 @@
                     </tr>
                 `;
             });
+            renderPagination('notificationPagination', result, 'loadNotifications');
         } catch (e) {
             console.error("加载消息失败", e);
             document.getElementById('notificationTableBody').innerHTML = `<tr><td colspan="7" class="empty-state text-danger">加载失败: ${e.message}</td></tr>`;

@@ -7,6 +7,8 @@ import com.example.keshe.service.DeviceService;
 import com.example.keshe.service.NotificationService;
 import com.example.keshe.service.OperationLogService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +33,14 @@ public class DeviceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Device>> getAllDevices() {
-        return ResponseEntity.ok(deviceService.getAllDevices());
+    public ResponseEntity<Page<Device>> getAllDevices(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String deviceType,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(deviceService.searchDevices(brand, deviceType, status, keyword, PageRequest.of(page, size)));
     }
 
     @GetMapping("/{id}")
@@ -113,14 +121,17 @@ public class DeviceController {
     }
 
     @GetMapping("/logs")
-    public ResponseEntity<List<OperationLog>> getAllLogs() {
-        return ResponseEntity.ok(logService.findAll());
+    public ResponseEntity<Page<OperationLog>> getAllLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(logService.findAll(PageRequest.of(page, size)));
     }
 
     @GetMapping("/notifications")
-    public ResponseEntity<List<Notification>> getAllNotifications() {
-        List<Notification> notifications = notificationService.findAll();
-        return ResponseEntity.ok(notifications);
+    public ResponseEntity<Page<Notification>> getAllNotifications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        return ResponseEntity.ok(notificationService.findAll(PageRequest.of(page, size)));
     }
 
     private boolean isAdmin(HttpSession session) {
