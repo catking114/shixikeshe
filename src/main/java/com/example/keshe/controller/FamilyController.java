@@ -37,6 +37,11 @@ public class FamilyController {
             }
 
             Family family = familyService.createFamily(userId, creatorRole, familyName);
+
+            // Update session with family info
+            session.setAttribute("familyId", family.getId());
+            session.setAttribute("familyRole", creatorRole);
+
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("success", true);
             result.put("family", family);
@@ -65,6 +70,11 @@ public class FamilyController {
             }
 
             Family family = familyService.joinFamily(userId, familyCode, familyRole);
+
+            // Update session with family info
+            session.setAttribute("familyId", family.getId());
+            session.setAttribute("familyRole", familyRole);
+
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("success", true);
             result.put("family", family);
@@ -114,6 +124,8 @@ public class FamilyController {
         }
         try {
             familyService.leaveFamily(userId);
+            session.removeAttribute("familyId");
+            session.removeAttribute("familyRole");
             return ResponseEntity.ok(Map.of("success", true, "message", "已离开家庭"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

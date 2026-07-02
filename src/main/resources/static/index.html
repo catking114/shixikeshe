@@ -449,7 +449,7 @@
         </div>
 
         <!-- No Family Banner -->
-        <div id="noFamilyBanner" class="alert alert-warning d-flex align-items-center mb-3" style="display:none;" role="alert">
+        <div id="noFamilyBanner" class="alert alert-warning d-none align-items-center mb-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <span>您还未加入任何家庭，请先创建或加入一个家庭后再使用设备管理功能。</span>
         </div>
@@ -1109,12 +1109,12 @@
 
                 // Show/hide no-family banner
                 if (!data.familyId) {
-                    if (noFamilyBanner) noFamilyBanner.style.display = 'block';
+                    if (noFamilyBanner) { noFamilyBanner.classList.remove('d-none'); noFamilyBanner.classList.add('d-flex'); }
                     // Hide add device button for users without family
                     var addBtn = document.getElementById('addDeviceBtn');
                     if (addBtn) addBtn.style.display = 'none';
                 } else {
-                    if (noFamilyBanner) noFamilyBanner.style.display = 'none';
+                    if (noFamilyBanner) { noFamilyBanner.classList.remove('d-flex'); noFamilyBanner.classList.add('d-none'); }
                     var addBtn = document.getElementById('addDeviceBtn');
                     if (addBtn && data.role === 'ADMIN') addBtn.style.display = '';
                 }
@@ -2505,7 +2505,7 @@
                 msgEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>创建成功！家庭码: <strong>' + data.family.familyCode + '</strong></span>';
                 setTimeout(function() {
                     createFamilyModalInstance.hide();
-                    loadFamilyInfo();
+                    checkAuth();
                 }, 2000);
             } else {
                 msgEl.innerHTML = '<span class="text-danger">' + (data.error || '创建失败') + '</span>';

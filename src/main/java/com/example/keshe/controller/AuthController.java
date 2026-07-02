@@ -97,13 +97,24 @@ public class AuthController {
         if (role == null) {
             return ResponseEntity.ok(Map.of("authenticated", false));
         }
+        Long userId = (Long) session.getAttribute("userId");
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("authenticated", true);
-        result.put("id", session.getAttribute("userId"));
+        result.put("id", userId);
         result.put("username", session.getAttribute("username"));
         result.put("role", role);
-        result.put("familyId", session.getAttribute("familyId"));
-        result.put("familyRole", session.getAttribute("familyRole"));
+        // Always read family info from database to avoid stale session
+        try {
+            User user = userService.getUserById(userId);
+            result.put("familyId", user.getFamilyId());
+            result.put("familyRole", user.getFamilyRole());
+            // Also sync session for other endpoints
+            session.setAttribute("familyId", user.getFamilyId());
+            session.setAttribute("familyRole", user.getFamilyRole());
+        } catch (Exception e) {
+            result.put("familyId", null);
+            result.put("familyRole", null);
+        }
         return ResponseEntity.ok(result);
     }
 
