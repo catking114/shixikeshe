@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智控后台管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --success-bg: #ecfdf5;
+            --success-text: #059669;
+            --danger-bg: #fef2f2;
+            --danger-text: #dc2626;
+            --warning-bg: #fffbeb;
+            --warning-text: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 40px 0;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .page-header h3 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-success {
+            background-color: var(--success-text);
+            color: white;
+        }
+        .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-action {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .btn-action:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #f1f5f9;
+        }
+        .btn-action.danger:hover {
+            border-color: var(--danger-text);
+            color: var(--danger-text);
+            background: var(--danger-bg);
+        }
+
+        .nav-tabs {
+            border-bottom: none;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            display: inline-flex;
+            gap: 4px;
+            margin-bottom: 24px !important;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 8px 20px;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        .nav-tabs .nav-link:hover { color: var(--text-main); background: rgba(255,255,255,0.5); }
+        .nav-tabs .nav-link.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .table {
+            margin-bottom: 0;
+            --bs-table-hover-bg: #f8fafc;
+        }
+        .table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            border-top: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+        .table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            border-color: var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .table-hover tbody tr:hover { background-color: #f8fafc; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-on { background: var(--success-bg); color: var(--success-text); }
+        .status-off { background: var(--danger-bg); color: var(--danger-text); }
+        .badge-read { background: var(--success-bg); color: var(--success-text); }
+        .badge-unread { background: var(--danger-bg); color: var(--danger-text); }
+
+        .btn-confirm {
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            border-radius: 6px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        .btn-confirm:hover { background: var(--primary-hover); }
+
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 24px;
+        }
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--bg-color);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 400px;
+            max-width: 90vw;
+        }
+        .auth-card h2 { font-weight: 700; margin-bottom: 8px; }
+        .auth-card .subtitle { color: var(--text-secondary); margin-bottom: 28px; font-size: 0.9rem; }
+        .auth-card .form-label { font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; }
+        .auth-card .btn-primary { width: 100%; padding: 12px; font-weight: 600; }
+        .auth-card .auth-switch { text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem; }
+        .auth-card .auth-switch a { color: var(--primary-color); cursor: pointer; font-weight: 600; text-decoration: none; }
+        .auth-card .auth-switch a:hover { text-decoration: underline; }
+        .auth-card .alert { display: none; margin-bottom: 16px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; }
+        .auth-card .alert.show { display: block; }
+        .auth-card .form-check-label { font-size: 0.9rem; color: var(--text-main); }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-info .badge-role { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+        .badge-admin { background: #eef2ff; color: #4f46e5; }
+        .badge-user { background: #f0fdf4; color: #16a34a; }
+
+        .online-dot {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px;
+        }
+        .online-dot.online { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
+        .online-dot.offline { background: #94a3b8; }
+        .online-dot.unknown { background: #e2e8f0; }
+
+        .ws-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.75rem; color: var(--text-secondary); padding: 4px 10px;
+            border-radius: 12px; background: #f1f5f9;
+        }
+        .ws-status .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .ws-status.connected .dot { background: #22c55e; }
+        .ws-status.disconnected .dot { background: #ef4444; }
+
+        .discover-panel {
+            background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px;
+            padding: 16px; margin-bottom: 16px;
+        }
+        .discover-panel .discover-results {
+            max-height: 200px; overflow-y: auto; margin-top: 12px;
+        }
+        .discover-panel .device-card {
+            background: white; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .discover-panel .device-card .device-info { font-size: 0.85rem; }
+        .discover-panel .device-card .device-info .model { color: var(--text-secondary); font-size: 0.78rem; }
+
+        .light-control-panel {
+            background: linear-gradient(135deg, #faf5ff 0%, #f0f9ff 100%);
+            border-radius: 16px; padding: 24px; margin-top: 16px;
+            border: 1px solid #e0e7ff;
+        }
+        .light-control-panel h5 { font-weight: 700; margin-bottom: 20px; }
+        .slider-group { margin-bottom: 16px; }
+        .slider-group label { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .slider-group input[type=range] { width: 100%; accent-color: var(--primary-color); }
+        .color-temp-preview {
+            height: 24px; border-radius: 6px; margin-top: 4px;
+            background: linear-gradient(to right, #ff9329, #fff5e0, #c7e1ff, #8ec9f8);
+        }
+        .rgb-picker { display: flex; gap: 8px; align-items: center; }
+        .rgb-picker input[type=color] { width: 48px; height: 36px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; padding: 2px; }
+        .rgb-preview { width: 48px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); }
+
+        .quick-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+        .quick-actions .btn { font-size: 0.8rem; padding: 6px 14px; border-radius: 20px; }
+
+        .table-responsive { border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+        .table-responsive .table { margin-bottom: 0; }
+
+        @media (max-width: 768px) {
+            body { padding: 16px 0; }
+            .container { padding-left: 12px; padding-right: 12px; }
+            .card.p-4 { padding: 16px !important; }
+            .page-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+            .page-header h3 { font-size: 1.2rem; }
+            .page-header .d-flex { width: 100%; }
+            .page-header .d-flex.gap-3 { flex-direction: column; align-items: flex-start !important; gap: 8px !important; }
+            .user-info { width: 100%; justify-content: space-between; }
+            #adminActions { width: 100%; }
+            #adminActions .btn { flex: 1; font-size: 0.85rem; padding: 10px 12px; }
+            .nav-tabs { overflow-x: auto; flex-wrap: nowrap; gap: 0; width: 100%; padding: 4px 0; -webkit-overflow-scrolling: touch; }
+            .nav-tabs .nav-link { white-space: nowrap; padding: 8px 14px; font-size: 0.85rem; flex-shrink: 0; }
+            .table thead { display: none; }
+            .table tbody tr { display: block; padding: 16px; margin-bottom: 12px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+            .table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 !important; border: none !important; font-size: 0.85rem; }
+            .table tbody td:not(:last-child) { border-bottom: 1px solid var(--border-color) !important; }
+            .table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 12px; flex-shrink: 0; }
+            .table tbody td:empty { display: none; }
+            .table tbody .empty-state td { display: block; text-align: center; }
+            .table tbody .empty-state td::before { display: none; }
+            .auth-card { padding: 24px 20px !important; }
+            .auth-card h2 { font-size: 1.3rem; }
+            .modal-dialog { margin: 8px; }
+            .modal-body { padding: 16px !important; }
+            .modal-header { padding: 14px 16px !important; }
+            .modal-footer { padding: 12px 16px !important; }
+            .btn { padding: 10px 14px; }
+            .status-badge { font-size: 0.7rem; padding: 3px 8px; }
+            .progress { width: 40px !important; }
+        }
+
+        .tuya-panel {
+            background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%);
+            border: 1px solid #86efac; border-radius: 12px;
+            padding: 16px; margin-bottom: 16px;
+        }
+        .tuya-panel .tuya-results {
+            max-height: 320px; overflow-y: auto; margin-top: 12px;
+        }
+        .tuya-panel .import-card {
+            background: white; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .tuya-panel .import-card .device-info { font-size: 0.85rem; }
+        .tuya-panel .import-card .device-info .category { color: var(--text-secondary); font-size: 0.78rem; }
+        .tuya-panel .import-summary {
+            background: white; border-radius: 8px; padding: 12px 16px; margin-top: 8px;
+            display: flex; gap: 24px; font-size: 0.85rem;
+        }
+        .tuya-panel .import-summary .stat { display: flex; align-items: center; gap: 6px; }
+        .tuya-panel .import-summary .stat-value { font-weight: 700; font-size: 1.1rem; }
+
+        .category-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px; margin-top: 16px;
+        }
+        .category-card {
+            background: white; border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 14px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .category-card:hover { border-color: var(--primary-color); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .category-card .cat-icon { font-size: 1.5rem; color: var(--primary-color); margin-bottom: 8px; }
+        .category-card .cat-name { font-weight: 600; font-size: 0.9rem; }
+        .category-card .cat-name-en { color: var(--text-secondary); font-size: 0.75rem; }
+        .category-card .cat-desc { color: var(--text-secondary); font-size: 0.78rem; margin-top: 6px; line-height: 1.4; }
+        .category-card .cat-count { margin-top: 6px; font-size: 0.75rem; color: var(--success-text); font-weight: 600; }
+
+        .tuya-config-panel {
+            background: #fffbeb; border: 1px solid #fbbf24; border-radius: 10px;
+            padding: 14px; margin-bottom: 16px;
+        }
+        .tuya-config-panel .config-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 0.85rem; }
+        .tuya-config-panel .config-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .tuya-config-panel .config-dot.ok { background: #22c55e; }
+        .tuya-config-panel .config-dot.missing { background: #ef4444; }
+
+        .model-search-results {
+            max-height: 240px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 4px;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .model-search-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .model-search-item:hover { background: #f8fafc; }
+        .model-search-item:last-child { border-bottom: none; }
+        .model-search-item .msi-brand { font-weight: 600; color: #4f46e5; font-size: 0.85rem; }
+        .model-search-item .msi-model { color: #64748b; font-size: 0.8rem; }
+        .model-search-item .msi-name { font-size: 0.9rem; color: #1e293b; }
+        .model-search-item .msi-desc { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+
+    </style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+        <div class="alert alert-danger" id="authAlert"></div>
+        <h2 id="authTitle">登录</h2>
+        <p class="subtitle" id="authSubtitle">登录以管理您的智能设备</p>
+        <form id="authForm" onsubmit="return false;">
+            <div class="mb-3">
+                <label class="form-label">用户名</label>
+                <input type="text" class="form-control" id="authUsername" required>
+            </div>
+            <div class="mb-3" id="emailField" style="display:none;">
+                <label class="form-label">邮箱</label>
+                <input type="email" class="form-control" id="authEmail">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-control" id="authPassword" required>
+            </div>
+            <div class="mb-3 form-check" id="roleField" style="display:none;">
+                <input type="checkbox" class="form-check-input" id="authAdmin">
+                <label class="form-check-label" for="authAdmin">注册为管理员</label>
+            </div>
+                <div class="mb-3" id="familyCodeField" style="display:none;">
+                    <label class="form-label text-secondary small fw-semibold">家庭码 (可选)</label>
+                    <input type="text" class="form-control" id="authFamilyCode" placeholder="输入6位家庭码加入家庭" maxlength="6" style="text-transform:uppercase;">
+                </div>
+                <div class="mb-3" id="familyRoleField" style="display:none;">
+                    <label class="form-label text-secondary small fw-semibold">家庭身份</label>
+                    <select class="form-select" id="authFamilyRole">
+                        <option value="">不加入家庭</option>
+                        <option value="父亲">父亲</option>
+                        <option value="母亲">母亲</option>
+                        <option value="儿子">儿子</option>
+                        <option value="女儿">女儿</option>
+                        <option value="爷爷">爷爷</option>
+                        <option value="奶奶">奶奶</option>
+                        <option value="孙子">孙子</option>
+                        <option value="孙女">孙女</option>
+                    </select>
+                </div>
+            <button type="button" class="btn btn-primary" id="authBtn" onclick="handleAuth()">登录</button>
+        </form>
+        <div class="auth-switch">
+            <span id="authSwitchText">还没有账号？</span>
+            <a id="authSwitchLink" onclick="toggleAuthMode()">立即注册</a>
+        </div>
+    </div>
+</div>
+
+<div id="mainApp" style="display:none;">
+<div class="container">
+    <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+            <h3><i class="bi bi-house-door-fill" style="color: var(--primary-color);"></i> 智控后台</h3>
+            <div class="d-flex align-items-center gap-3">
+                <span class="ws-status disconnected" id="wsStatus" title="WebSocket状态"><span class="dot"></span>WS</span>
+                <div class="user-info" id="userInfo">
+                    <span id="userDisplayName"></span>
+                    <span class="badge-role" id="userRoleBadge"></span>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="logout()">退出</button>
+                </div>
+                <div class="d-flex gap-2" id="adminActions">
+                    <button class="btn btn-outline-info btn-sm" onclick="discoverDevices()" id="discoverBtn" title="扫描局域网设备"><i class="bi bi-search me-1"></i>扫描设备</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="openTuyaPanel()" id="tuyaBtn" title="从涂鸦平台导入"><i class="bi bi-cloud-download me-1"></i>涂鸦导入</button>
+                    <button class="btn btn-primary" onclick="openAddModal()" id="addDeviceBtn"><i class="bi bi-plus-lg me-1"></i>添加设备</button>
+                    <button class="btn btn-success" onclick="openAddUserModal()"><i class="bi bi-person-plus me-1"></i>添加用户</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Family Banner -->
+        <div id="noFamilyBanner" class="alert alert-warning d-none align-items-center mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span>您还未加入任何家庭，请先创建或加入一个家庭后再使用设备管理功能。</span>
+        </div>
+
+        <!-- Family Management Section -->
+        <div id="familySection" class="mb-3" style="display:none;">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-primary" onclick="openCreateFamilyModal()" id="createFamilyBtn">
+                    <i class="bi bi-house-add me-1"></i>新建家庭
+                </button>
+                <button class="btn btn-sm btn-outline-info" onclick="viewFamilyInfo()">
+                    <i class="bi bi-people me-1"></i>我的家庭
+                </button>
+                <span id="familyCodeDisplay" class="text-secondary small" style="display:none;"></span>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="device-tab" data-bs-toggle="tab" data-bs-target="#device-pane" type="button">
+                    <i class="bi bi-cpu me-1"></i>设备管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation" id="logTabItem">
+                <button class="nav-link" id="log-tab" data-bs-toggle="tab" data-bs-target="#log-pane" type="button">
+                    <i class="bi bi-journal-text me-1"></i>操作日志
+                </button>
+            </li>
+            <li class="nav-item" role="presentation" id="userTabItem">
+                <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-pane" type="button" onclick="loadUsers(0)">
+                    <i class="bi bi-people me-1"></i>用户管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-pane" type="button" onclick="loadNotifications(0)">
+                    <i class="bi bi-bell me-1"></i>消息通知
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="device-pane" role="tabpanel">
+                <!-- Discovery panel (hidden by default) -->
+                <div class="discover-panel" id="discoverPanel" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong><i class="bi bi-broadcast me-1"></i> 局域网设备扫描结果</strong>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="closeDiscoverPanel()">关闭</button>
+                    </div>
+                    <div id="discoverStatus" class="text-muted small mt-2">正在扫描...</div>
+                    <div class="discover-results" id="discoverResults"></div>
+                </div>
+
+
+                <!-- Tuya Import Panel (hidden by default) -->
+                <div class="tuya-panel" id="tuyaPanel" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong><i class="bi bi-cloud-download me-1"></i> 涂鸦智能平台导入</strong>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="closeTuyaPanel()">关闭</button>
+                    </div>
+
+                    <!-- Tuya Config Status -->
+                    <div id="tuyaConfigStatus" class="tuya-config-panel mt-2" style="display:none;">
+                        <strong class="small">平台配置状态</strong>
+                        <div id="tuyaConfigItems" class="mt-1"></div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <button class="btn btn-sm btn-primary" onclick="importTuyaDevices()" id="tuyaImportBtn">
+                            <i class="bi bi-cloud-download me-1"></i>导入我的设备
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="syncTuyaCategories()" id="tuyaSyncBtn">
+                            <i class="bi bi-arrow-repeat me-1"></i>同步品类库
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="loadTuyaCategories()">
+                            <i class="bi bi-grid me-1"></i>浏览品类
+                        </button>
+                    </div>
+
+                    <div id="tuyaImportStatus" class="text-muted small mt-2"></div>
+
+                    <!-- Import results -->
+                    <div id="tuyaImportResults" class="tuya-results"></div>
+
+                    <!-- Category browser -->
+                    <div id="tuyaCategoryBrowser" style="display:none;">
+                        <hr class="my-2">
+                        <strong class="small"><i class="bi bi-grid-3x3-gap me-1"></i>涂鸦设备品类库</strong>
+                        <div class="category-grid" id="tuyaCategoryGrid"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-end">
+                    <div class="flex-grow-1" style="min-width:160px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">搜索</label>
+                        <input type="text" class="form-control form-control-sm" id="searchKeyword" placeholder="设备名称 / 位置...">
+                    </div>
+                    <div style="min-width:130px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">品牌</label>
+                        <select class="form-select form-select-sm" id="filterBrand"></select>
+                    </div>
+                    <div style="min-width:110px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">类型</label>
+                        <select class="form-select form-select-sm" id="filterType">
+                            <option value="">全部类型</option>
+                            <option value="Light">灯光</option>
+                            <option value="Sensor">传感器</option>
+                            <option value="Switch">开关</option>
+                            <option value="Fan">风扇</option>
+                            <option value="Cover">窗帘</option>
+                            <option value="Lock">门锁</option>
+                            <option value="Climate">环境电器</option>
+                            <option value="Camera">摄像机</option>
+                            <option value="Robot">扫地机</option>
+                            <option value="Other">其他</option>
+                        </select>
+                    </div>
+                    <div style="min-width:110px">
+                        <label class="form-label text-secondary small fw-semibold mb-1">状态</label>
+                        <select class="form-select form-select-sm" id="filterStatus">
+                            <option value="">全部状态</option>
+                            <option value="1">开启</option>
+                            <option value="0">关闭</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="applyFilter()"><i class="bi bi-search me-1"></i>搜索</button>
+                        <button class="btn btn-light btn-sm" onclick="resetFilter()"><i class="bi bi-arrow-counterclockwise me-1"></i>重置</button>
+                    </div>
+                </div>
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>品牌</th>
+                        <th>类型</th>
+                        <th>协议</th>
+                        <th>位置</th>
+                        <th>状态</th>
+                        <th style="width: 160px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="deviceTableBody"></tbody>
+                </table>
+                <div id="devicePagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
+            </div>
+
+            <div class="tab-pane fade" id="log-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>设备ID</th>
+                        <th>指令</th>
+                        <th style="width: 80px;">操作</th>
+                        <th>参数</th>
+                        <th>操作时间</th>
+                    </tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+                <div id="logPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
+            </div>
+
+            <div class="tab-pane fade" id="user-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>角色</th>
+                        <th>家庭身份</th>
+                        <th>创建时间</th>
+                        <th style="width: 140px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+                <div id="userPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
+            </div>
+
+            <div class="tab-pane fade" id="notification-pane" role="tabpanel">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户ID</th>
+                        <th>设备ID</th>
+                        <th>消息内容</th>
+                        <th>状态</th>
+                        <th>时间</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="notificationTableBody"></tbody>
+                </table>
+                <div id="notificationPagination" class="d-flex justify-content-between align-items-center px-2 py-2 border-top"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deviceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalTitle">添加设备</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deviceForm">
+                    <input type="hidden" id="deviceId">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">品牌</label>
+                            <select class="form-select" id="brand" onchange="toggleCustomBrand()" required>
+                                <option value="" disabled selected>请选择品牌</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="customBrand" placeholder="请输入自定义品牌名称" style="display:none;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">名称</label>
+                            <input type="text" class="form-control" id="deviceName" required>
+                        </div>
+                    </div>
+                <!-- 设备型号搜索 -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-search me-1"></i>型号搜索</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="modelSearchInput" placeholder="输入品牌、型号或关键词模糊搜索..." oninput="debounceModelSearch()">
+                        <button class="btn btn-outline-secondary" onclick="clearModelSearch()"><i class="bi bi-x"></i></button>
+                    </div>
+                    <div id="modelSearchResults" class="model-search-results" style="display:none;"></div>
+                </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small fw-semibold">类型</label>
+                            <select class="form-select" id="deviceType">
+                                <option value="Light">灯光</option>
+                                <option value="Switch">开关</option>
+                                <option value="Sensor">传感器</option>
+                                <option value="Fan">风扇</option>
+                                <option value="Cover">窗帘</option>
+                                <option value="Lock">门锁</option>
+                                <option value="Climate">环境电器</option>
+                                <option value="Camera">摄像机</option>
+                                <option value="Robot">扫地机</option>
+                                <option value="Other">其他</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small fw-semibold">位置</label>
+                            <input type="text" class="form-control" id="roomLocation" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small fw-semibold">型号</label>
+                            <input type="text" class="form-control" id="deviceModel" placeholder="如 YLDP004">
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <label class="form-label text-secondary small fw-semibold"><i class="bi bi-wifi me-1"></i>网络连接 (可选)</label>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">协议类型</label>
+                            <select class="form-select form-select-sm" id="protocolType">
+                                <option value="">无 (本地模式)</option>
+                                <option value="YEELIGHT_LAN">Yeelight LAN</option>
+                                <option value="TUYA_CLOUD">Tuya Cloud</option>
+                                <option value="MQTT">MQTT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">IP 地址</label>
+                            <input type="text" class="form-control form-control-sm" id="ipAddress" placeholder="192.168.x.x">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small">端口</label>
+                            <input type="number" class="form-control form-control-sm" id="port" placeholder="55443">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">外部设备ID (Tuya等)</label>
+                            <input type="text" class="form-control form-control-sm" id="externalDeviceId" placeholder="可选">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-secondary small">电量(%)</label>
+                            <input type="number" class="form-control form-control-sm" id="batteryLevel" value="100">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-secondary small">状态</label>
+                            <select class="form-select form-select-sm" id="status">
+                                <option value="0">关闭</option>
+                                <option value="1">开启</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveDevice()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Light Control Modal -->
+<div class="modal fade" id="lightControlModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-lightbulb me-2" style="color:#fbbf24"></i> <span id="lcDeviceName">灯光控制</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="lcDeviceId">
+                <!-- Power toggle -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-semibold">电源</span>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="lcPowerToggle" onchange="toggleLightPower()" style="width:3em;height:1.5em;">
+                    </div>
+                </div>
+
+                <div class="light-control-panel">
+                    <!-- Brightness -->
+                    <div class="slider-group">
+                        <label>亮度 <span id="lcBrightnessVal">100%</span></label>
+                        <input type="range" id="lcBrightness" min="1" max="100" value="100" oninput="updateBrightnessLabel(this.value)" onchange="sendBrightness()">
+                    </div>
+
+                    <!-- Color Temperature -->
+                    <div class="slider-group">
+                        <label>色温 <span id="lcColorTempVal">4000K</span></label>
+                        <input type="range" id="lcColorTemp" min="2700" max="6500" value="4000" step="100" oninput="updateColorTempLabel(this.value)" onchange="sendColorTemp()">
+                        <div class="color-temp-preview"></div>
+                    </div>
+
+                    <!-- RGB Color -->
+                    <div class="slider-group">
+                        <label>RGB 颜色</label>
+                        <div class="rgb-picker">
+                            <input type="color" id="lcRgbColor" value="#ffffff" onchange="sendRgbColor(this.value)">
+                            <div class="rgb-preview" id="lcRgbPreview" style="background:#ffffff;"></div>
+                            <span class="text-secondary small" id="lcRgbVal">#FFFFFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick actions -->
+                    <div class="quick-actions">
+                        <button class="btn btn-outline-secondary" onclick="setLightPreset('reading')"><i class="bi bi-book me-1"></i>阅读</button>
+                        <button class="btn btn-outline-secondary" onclick="setLightPreset('warm')"><i class="bi bi-sun me-1"></i>暖光</button>
+                        <button class="btn btn-outline-secondary" onclick="setLightPreset('cool')"><i class="bi bi-snow me-1"></i>冷光</button>
+                        <button class="btn btn-outline-secondary" onclick="setLightPreset('night')"><i class="bi bi-moon me-1"></i>夜灯</button>
+                        <button class="btn btn-outline-primary" onclick="syncDeviceStatus()"><i class="bi bi-arrow-repeat me-1"></i>同步状态</button>
+                    </div>
+                </div>
+
+                <div id="lcStatusMsg" class="text-muted small mt-2 text-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Tuya Category Detail Modal -->
+<div class="modal fade" id="tuyaCatDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-cpu me-2"></i> <span id="tcdTitle">品类详情</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tcdDescription" class="text-secondary mb-3"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-sliders me-1"></i> 指令集 (Functions)</h6>
+                        <div id="tcdFunctions" class="border rounded p-2" style="max-height:300px;overflow-y:auto;font-size:0.85rem;">
+                            <span class="text-muted">加载中...</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="bi bi-activity me-1"></i> 状态集 (Status)</h6>
+                        <div id="tcdStatus" class="border rounded p-2" style="max-height:300px;overflow-y:auto;font-size:0.85rem;">
+                            <span class="text-muted">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="tcdMeta" class="text-secondary small mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="userModalTitle">添加用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">用户名</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">邮箱</label>
+                        <input type="email" class="form-control" id="userEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">密码 <span class="text-muted fw-normal">(留空则默认 123456)</span></label>
+                        <input type="password" class="form-control" id="userPassword" placeholder="请输入密码">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">系统角色</label>
+                            <select class="form-select" id="userRole">
+                                <option value="USER">普通用户</option>
+                                <option value="ADMIN">管理员</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">家庭身份</label>
+                            <select class="form-select" id="userFamilyRole">
+                                <option value="">无</option>
+                                <option value="父亲">父亲</option>
+                                <option value="母亲">母亲</option>
+                                <option value="儿子">儿子</option>
+                                <option value="女儿">女儿</option>
+                                <option value="爷爷">爷爷</option>
+                                <option value="奶奶">奶奶</option>
+                                <option value="孙子">孙子</option>
+                                <option value="孙女">孙女</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Create Family Modal -->
+<div class="modal fade" id="createFamilyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;border:none;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-house-add me-2"></i>新建家庭</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">家庭名称 (可选)</label>
+                    <input type="text" class="form-control" id="familyNameInput" placeholder="如：温馨之家">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">您的家庭身份 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="creatorRoleSelect" required>
+                        <option value="" disabled selected>请选择身份</option>
+                        <option value="父亲">父亲</option>
+                        <option value="母亲">母亲</option>
+                        <option value="儿子">儿子</option>
+                        <option value="女儿">女儿</option>
+                        <option value="爷爷">爷爷</option>
+                        <option value="奶奶">奶奶</option>
+                        <option value="孙子">孙子</option>
+                        <option value="孙女">孙女</option>
+                    </select>
+                </div>
+                <div id="createFamilyMsg" class="small"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createFamily()">创建家庭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Family Info Modal -->
+<div class="modal fade" id="familyInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius:16px;border:none;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-people-fill me-2"></i>家庭信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="familyInfoContent">
+                    <div class="text-center text-muted p-4">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_BASE = '/api/devices';
+    const NOTIFICATION_API_BASE = '/api/notifications';
+    const AUTH_BASE = '/api/auth';
+    const USER_BASE = '/api/users';
+    let modalInstance, lightControlModalInstance, userModalInstance, tuyaCatDetailModalInstance;
+    let currentUser = null;
+    let isLoginMode = true;
+    const PAGE_SIZE = 8;
+    let devicePage = 0, logPage = 0, userPage = 0, notifPage = 0;
+    let ws = null;
+
+    const BRAND_LIST = [
+        '小米(Xiaomi)', '华为(Huawei)', '美的(Midea)', '海尔(Haier)', '格力(Gree)',
+        'Aqara(绿米)', 'Yeelight', 'Sonoff', '涂鸦智能(Tuya)', '欧瑞博(ORVIBO)',
+        '萤石(EZVIZ)', '乐橙(Imou)', '公牛(BULL)', 'TP-Link', 'Philips Hue',
+        'Samsung SmartThings', 'Google Nest', 'Amazon Echo', 'Sonos', '博世(Bosch)',
+        '松下(Panasonic)', '戴森(Dyson)', '石头(Roborock)', '追觅(Dreame)', '云鲸(NARWAL)'
+    ];
+
+    function renderPagination(containerId, pageData, loadFn) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        const { number, totalPages, totalElements } = pageData;
+        if (totalPages <= 1 && totalElements <= PAGE_SIZE) {
+            el.innerHTML = '<span class="text-muted small">共 ' + totalElements + ' 条</span>';
+            return;
+        }
+        const prevDisabled = number <= 0;
+        const nextDisabled = number >= totalPages - 1;
+        el.innerHTML =
+            '<span class="text-muted small">共 ' + totalElements + ' 条</span>' +
+            '<nav><ul class="pagination pagination-sm mb-0" style="gap:2px">' +
+            '<li class="page-item ' + (prevDisabled ? 'disabled' : '') + '">' +
+            '<a class="page-link border rounded" style="cursor:pointer" onclick="' + (prevDisabled ? '' : loadFn + '(' + (number - 1) + ')') + '">上一页</a></li>' +
+            '<li class="page-item disabled"><span class="page-link border-0 text-dark">第 ' + (number+1) + '/' + totalPages + ' 页</span></li>' +
+            '<li class="page-item ' + (nextDisabled ? 'disabled' : '') + '">' +
+            '<a class="page-link border rounded" style="cursor:pointer" onclick="' + (nextDisabled ? '' : loadFn + '(' + (number + 1) + ')') + '">下一页</a></li>' +
+            '</ul></nav>';
+    }
+
+    function populateBrandDropdowns() {
+        const filterBrand = document.getElementById('filterBrand');
+        const modalBrand = document.getElementById('brand');
+        filterBrand.innerHTML = '<option value="">全部品牌</option>';
+        modalBrand.innerHTML = '<option value="" disabled selected>请选择品牌</option>';
+        BRAND_LIST.forEach(function(brand) {
+            filterBrand.innerHTML += '<option value="' + brand + '">' + brand + '</option>';
+            modalBrand.innerHTML += '<option value="' + brand + '">' + brand + '</option>';
+        });
+        modalBrand.innerHTML += '<option value="__custom__">自定义品牌...</option>';
+    }
+
+    function toggleCustomBrand() {
+        const brandSelect = document.getElementById('brand');
+        const customBrandInput = document.getElementById('customBrand');
+        if (brandSelect.value === '__custom__') {
+            customBrandInput.style.display = 'block';
+            customBrandInput.required = true;
+        } else {
+            customBrandInput.style.display = 'none';
+            customBrandInput.required = false;
+            customBrandInput.value = '';
+        }
+    }
+
+    function applyFilter() { loadDevices(0); }
+
+    function resetFilter() {
+        document.getElementById('searchKeyword').value = '';
+        document.getElementById('filterBrand').value = '';
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterStatus').value = '';
+        loadDevices(0);
+    }
+
+    function getFilterParams() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        const brand = document.getElementById('filterBrand').value;
+        const deviceType = document.getElementById('filterType').value;
+        const status = document.getElementById('filterStatus').value;
+        var params = 'page=' + devicePage + '&size=' + PAGE_SIZE;
+        if (keyword) params += '&keyword=' + encodeURIComponent(keyword);
+        if (brand) params += '&brand=' + encodeURIComponent(brand);
+        if (deviceType) params += '&deviceType=' + encodeURIComponent(deviceType);
+        if (status !== '') params += '&status=' + status;
+        return params;
+    }
+
+    // ===== WebSocket =====
+    function connectWebSocket() {
+        var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var wsUrl = protocol + '//' + location.host + '/ws/device';
+        try {
+            ws = new WebSocket(wsUrl);
+            ws.onopen = function() {
+                var el = document.getElementById('wsStatus');
+                el.className = 'ws-status connected';
+                el.title = 'WebSocket 已连接';
+            };
+            ws.onmessage = function(event) {
+                try {
+                    var msg = JSON.parse(event.data);
+                    if (msg.type === 'device_status_change') {
+                        loadDevices();
+                    }
+                } catch(e) {}
+            };
+            ws.onclose = function() {
+                var el = document.getElementById('wsStatus');
+                el.className = 'ws-status disconnected';
+                el.title = 'WebSocket 已断开';
+                setTimeout(connectWebSocket, 5000);
+            };
+            ws.onerror = function() { ws.close(); };
+        } catch(e) {
+            console.log('WebSocket connection failed');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        modalInstance = new bootstrap.Modal(document.getElementById('deviceModal'));
+        lightControlModalInstance = new bootstrap.Modal(document.getElementById('lightControlModal'));
+        userModalInstance = new bootstrap.Modal(document.getElementById('userModal'));
+        tuyaCatDetailModalInstance = new bootstrap.Modal(document.getElementById('tuyaCatDetailModal'));
+        var cfEl = document.getElementById('createFamilyModal');
+        if (cfEl) createFamilyModalInstance = new bootstrap.Modal(cfEl);
+        var fiEl = document.getElementById('familyInfoModal');
+        if (fiEl) familyInfoModalInstance = new bootstrap.Modal(fiEl);
+        populateBrandDropdowns();
+        document.getElementById('searchKeyword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') applyFilter();
+        });
+        checkAuth();
+    });
+
+    async function checkAuth() {
+        try {
+            const res = await fetch(AUTH_BASE + '/me');
+            const data = await res.json();
+            if (data.authenticated) {
+                currentUser = data;
+                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userDisplayName').innerHTML = '<i class="bi bi-person-circle me-1"></i>' + escapeHtml(data.username);
+                const badge = document.getElementById('userRoleBadge');
+                const familySection = document.getElementById('familySection');
+                const createBtn = document.getElementById('createFamilyBtn');
+                const noFamilyBanner = document.getElementById('noFamilyBanner');
+
+                if (data.role === 'ADMIN') {
+                    document.getElementById('userTabItem').style.display = '';
+                    document.getElementById('logTabItem').style.display = '';
+                    familySection.style.display = 'block';
+                    createBtn.style.display = '';
+                    badge.className = 'badge-role badge-admin';
+                    badge.textContent = '管理员';
+                    document.getElementById('adminActions').style.display = 'flex';
+                    loadFamilyInfo();
+                } else {
+                    badge.className = 'badge-role badge-user';
+                    badge.textContent = '普通用户';
+                    document.getElementById('adminActions').style.display = 'none';
+                    document.getElementById('userTabItem').style.display = 'none';
+                    document.getElementById('logTabItem').style.display = 'none';
+                    // Non-admin with family can view family info
+                    if (data.familyId) {
+                        familySection.style.display = 'block';
+                        createBtn.style.display = 'none';
+                        loadFamilyInfo();
+                    } else {
+                        familySection.style.display = 'none';
+                    }
+                }
+
+                // Show/hide no-family banner
+                if (!data.familyId) {
+                    if (noFamilyBanner) { noFamilyBanner.classList.remove('d-none'); noFamilyBanner.classList.add('d-flex'); }
+                    // Hide add device button for users without family
+                    var addBtn = document.getElementById('addDeviceBtn');
+                    if (addBtn) addBtn.style.display = 'none';
+                } else {
+                    if (noFamilyBanner) { noFamilyBanner.classList.remove('d-flex'); noFamilyBanner.classList.add('d-none'); }
+                    var addBtn = document.getElementById('addDeviceBtn');
+                    if (addBtn && data.role === 'ADMIN') addBtn.style.display = '';
+                }
+
+                loadDevices();
+                loadLogs();
+                connectWebSocket();
+            }
+        } catch (e) { console.log(e); }
+    }
+
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('authTitle').textContent = isLoginMode ? '登录' : '注册';
+        document.getElementById('authSubtitle').textContent = isLoginMode ? '登录以管理您的智能设备' : '创建账号以开始使用';
+        document.getElementById('authBtn').textContent = isLoginMode ? '登录' : '注册';
+        document.getElementById('authSwitchText').textContent = isLoginMode ? '还没有账号？' : '已有账号？';
+        document.getElementById('authSwitchLink').textContent = isLoginMode ? '立即注册' : '立即登录';
+        document.getElementById('emailField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('roleField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('familyCodeField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('familyRoleField').style.display = isLoginMode ? 'none' : 'block';
+        document.getElementById('authAlert').className = 'alert alert-danger';
+        document.getElementById('authAlert').textContent = '';
+    }
+
+    async function handleAuth() {
+        const username = document.getElementById('authUsername').value.trim();
+        const password = document.getElementById('authPassword').value;
+        const alertEl = document.getElementById('authAlert');
+        alertEl.className = 'alert alert-danger';
+        alertEl.textContent = '';
+        if (!username || !password) { alertEl.textContent = '用户名和密码不能为空'; alertEl.classList.add('show'); return; }
+        try {
+            if (isLoginMode) {
+                const res = await fetch(AUTH_BASE + '/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (!res.ok) { alertEl.textContent = data.error || '登录失败'; alertEl.classList.add('show'); return; }
+            } else {
+                const email = document.getElementById('authEmail').value.trim();
+                if (!email) { alertEl.textContent = '邮箱不能为空'; alertEl.classList.add('show'); return; }
+                const role = document.getElementById('authAdmin').checked ? 'ADMIN' : 'USER';
+                var regPayload = { username, password, email, role };
+                var familyCode = document.getElementById('authFamilyCode').value.trim().toUpperCase();
+                var familyRole = document.getElementById('authFamilyRole').value;
+                if (familyCode) regPayload.familyCode = familyCode;
+                if (familyRole) regPayload.familyRole = familyRole;
+                const res = await fetch(AUTH_BASE + '/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(regPayload) });
+                const data = await res.json();
+                if (!res.ok) { alertEl.textContent = data.error || '注册失败'; alertEl.classList.add('show'); return; }
+            }
+            document.getElementById('authUsername').value = '';
+            document.getElementById('authPassword').value = '';
+            checkAuth();
+        } catch (e) { alertEl.textContent = '网络错误'; alertEl.classList.add('show'); }
+    }
+
+    async function logout() {
+        await fetch(AUTH_BASE + '/logout', { method: 'POST' });
+        currentUser = null;
+        document.getElementById('authOverlay').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
+        isLoginMode = false;
+        toggleAuthMode();
+        if (ws) ws.close();
+    }
+
+    function isAdmin() { return currentUser && currentUser.role === 'ADMIN'; }
+
+    // ===== Device List =====
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    async function loadDevices(p) {
+        if (p !== undefined) devicePage = p;
+        try {
+            const params = getFilterParams();
+            const res = await fetch(API_BASE + '?' + params);
+            const result = await res.json();
+            const data = result.content;
+            const tbody = document.getElementById('deviceTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-inbox d-block"></i>暂无设备数据</td></tr>';
+                renderPagination('devicePagination', result, 'loadDevices');
+                return;
+            }
+            data.forEach(function(device) {
+                const statusHtml = device.status === 1
+                    ? '<span class="status-badge status-on"><i class="bi bi-check-circle-fill"></i> 开启</span>'
+                    : '<span class="status-badge status-off"><i class="bi bi-x-circle-fill"></i> 关闭</span>';
+
+                const onlineDot = device.onlineStatus === 1
+                    ? '<span class="online-dot online"></span>在线'
+                    : device.onlineStatus === 0
+                    ? '<span class="online-dot offline"></span>离线'
+                    : '<span class="online-dot unknown"></span>';
+
+                const protocolLabel = device.protocolType
+                    ? '<span class="badge bg-light text-dark border" style="font-size:0.7rem">' + device.protocolType.replace('YEELIGHT_LAN','Yeelight').replace('TUYA_CLOUD','Tuya') + '</span>'
+                    : '<span class="text-muted small">本地</span>';
+
+                var actions = '';
+                if (isAdmin()) {
+                    actions = '<div class="d-flex gap-1">';
+                    if (device.deviceType === 'Light') {
+                        actions += '<button class="btn btn-action" onclick="openLightControl(' + device.id + ')" title="灯光控制"><i class="bi bi-lightbulb"></i></button>';
+                    }
+                    if (device.deviceType !== 'Sensor') {
+                        actions += '<button class="btn btn-action" onclick="openDeviceControl(' + device.id + ')" title="控制面板"><i class="bi bi-sliders"></i></button>';
+                    }
+                    if (device.protocolType === 'TUYA_CLOUD' && device.externalDeviceId) {
+                        actions += '<button class="btn btn-action" onclick="showTuyaFunctions(\'' + device.externalDeviceId + '\')" title="查看指令集"><i class="bi bi-cpu"></i></button>';
+                    }
+                    actions += '<button class="btn btn-action" onclick="editDevice(' + device.id + ')" title="编辑"><i class="bi bi-pencil"></i></button>';
+                    actions += '<button class="btn btn-action danger" onclick="deleteDevice(' + device.id + ')" title="删除"><i class="bi bi-trash3"></i></button>';
+                    actions += '<button class="btn btn-action" onclick="openSchedule(' + device.id + ')" title="定时任务"><i class="bi bi-clock-history"></i></button>';
+                    actions += '</div>';
+                } else {
+                    actions = '<div class="d-flex gap-1">';
+                    var isOn = device.status === 1;
+                    actions += '<button class="btn btn-sm ' + (isOn ? 'btn-success' : 'btn-outline-secondary') + '" onclick="quickToggle(' + device.id + ',\'' + (isOn ? 'turn_off' : 'turn_on') + '\')" title="' + (isOn ? '关闭' : '开启') + '"><i class="bi ' + (isOn ? 'bi-power' : 'bi-power') + '"></i> ' + (isOn ? '关闭' : '开启') + '</button>';
+                    if (device.deviceType !== 'Sensor') {
+                        actions += '<button class="btn btn-sm btn-outline-primary" onclick="openDeviceControl(' + device.id + ')" title="控制面板"><i class="bi bi-sliders"></i></button>';
+                    }
+                    actions += '<button class="btn btn-sm btn-outline-info" onclick="openSchedule(' + device.id + ')" title="定时任务"><i class="bi bi-clock-history"></i></button>';
+                    actions += '</div>';
+                }
+
+                tbody.innerHTML +=
+                    '<tr>' +
+                    '<td data-label="ID" class="text-secondary">#' + escapeHtml(device.id) + '</td>' +
+                    '<td data-label="名称" class="fw-semibold">' + escapeHtml(device.deviceName) + '</td>' +
+                    '<td data-label="品牌">' + escapeHtml(device.brand) + '</td>' +
+                    '<td data-label="类型"><span class="badge bg-light text-dark border">' + escapeHtml(device.deviceType) + '</span></td>' +
+                    '<td data-label="协议">' + protocolLabel + '</td>' +
+                    '<td data-label="位置">' + escapeHtml(device.roomLocation) + '</td>' +
+                    '<td data-label="状态">' + onlineDot + ' ' + statusHtml + '</td>' +
+                    '<td data-label="操作">' + actions + '</td>' +
+                    '</tr>';
+            });
+            renderPagination('devicePagination', result, 'loadDevices');
+        } catch (e) { console.error("加载失败", e); }
+    }
+
+
+    // ===== Quick Toggle & Device Control =====
+    async function quickToggle(deviceId, command) {
+        try {
+            const res = await fetch(API_BASE + '/control', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({deviceId: deviceId, command: command})
+            });
+            if (res.ok) { setTimeout(() => loadDevices(), 500); }
+        } catch(e) { console.error('Toggle failed', e); }
+    }
+
+    var deviceControlData = null;
+    async function openDeviceControl(deviceId) {
+        try {
+            const res = await fetch(API_BASE + '/' + deviceId);
+            deviceControlData = await res.json();
+            var d = deviceControlData;
+            document.getElementById('dcTitle').innerText = d.deviceName + ' — 控制面板';
+            document.getElementById('dcDeviceId').value = d.id;
+
+            // Hide all panels first
+            document.querySelectorAll('.dc-panel').forEach(p => p.style.display = 'none');
+
+            // Show type-specific panel
+            var type = d.deviceType || 'Switch';
+            var panelId = 'dcPanel_' + type;
+            var panel = document.getElementById(panelId);
+            if (!panel) panel = document.getElementById('dcPanel_Switch'); // fallback
+            panel.style.display = 'block';
+
+            // Populate common: on/off state
+            var powerBtn = document.getElementById('dcPowerBtn');
+            var isOn = d.status === 1;
+            powerBtn.className = 'btn btn-lg w-100 ' + (isOn ? 'btn-success' : 'btn-outline-danger');
+            powerBtn.innerHTML = '<i class="bi bi-power"></i> ' + (isOn ? '已开启 — 点击关闭' : '已关闭 — 点击开启');
+            powerBtn.onclick = function() {
+                quickToggle(d.id, isOn ? 'turn_off' : 'turn_on');
+                setTimeout(() => openDeviceControl(d.id), 800);
+            };
+
+            // Type-specific population
+            if (type === 'Light') {
+                document.getElementById('dcBrightSlider').value = d.brightness || 100;
+                document.getElementById('dcBrightVal').innerText = d.brightness || 100;
+                document.getElementById('dcCtSlider').value = d.colorTemp || 4000;
+                document.getElementById('dcCtVal').innerText = d.colorTemp || 4000;
+            } else if (type === 'Fan') {
+                document.getElementById('dcFanSpeed').value = 'mid';
+                document.getElementById('dcFanMode').value = 'normal';
+            } else if (type === 'Climate') {
+                document.getElementById('dcTempSlider').value = 26;
+                document.getElementById('dcTempVal').innerText = 26;
+                document.getElementById('dcClimateMode').value = 'auto';
+            } else if (type === 'Cover') {
+                document.getElementById('dcCoverPos').value = 50;
+                document.getElementById('dcCoverVal').innerText = 50;
+            }
+
+            // Show online status
+            var onlineText = d.onlineStatus === 1 ? '在线' : d.onlineStatus === 0 ? '离线' : '未知';
+            document.getElementById('dcOnlineStatus').innerText = '设备状态: ' + onlineText + ' | 协议: ' + (d.protocolType || '本地');
+
+            deviceControlModalInstance.show();
+        } catch(e) { alert('加载设备信息失败: ' + e.message); }
+    }
+
+    async function sendDeviceControl(deviceId, action, extraParams) {
+        var params = Object.assign({action: action}, extraParams || {});
+        try {
+            const res = await fetch(API_BASE + '/' + deviceId + '/control-light', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(params)
+            });
+            const result = await res.json();
+            if (result.success === false) { alert('控制失败: ' + (result.error || '未知错误')); }
+            else { setTimeout(() => openDeviceControl(deviceId), 600); }
+        } catch(e) { alert('控制失败: ' + e.message); }
+    }
+
+
+    // ===== Device Model Search =====
+    var modelSearchTimer = null;
+    function debounceModelSearch() {
+        clearTimeout(modelSearchTimer);
+        modelSearchTimer = setTimeout(doModelSearch, 300);
+    }
+
+    async function doModelSearch() {
+        var q = document.getElementById('modelSearchInput').value.trim();
+        var container = document.getElementById('modelSearchResults');
+        if (!q) { container.style.display = 'none'; container.innerHTML = ''; return; }
+        try {
+            var type = document.getElementById('deviceType').value || '';
+            var url = '/api/device-models/search?q=' + encodeURIComponent(q);
+            if (type) url += '&type=' + encodeURIComponent(type);
+            var res = await fetch(url);
+            var models = await res.json();
+            if (models.length === 0) {
+                container.innerHTML = '<div class="p-3 text-center text-muted">未找到匹配的设备型号</div>';
+                container.style.display = 'block';
+                return;
+            }
+            var html = '';
+            models.slice(0, 10).forEach(function(m) {
+                html += '<div class="model-search-item" onclick="selectDeviceModel(' + m.id + ',\'' + escapeHtml(m.brand) + '\',\'' + escapeHtml(m.modelCode) + '\',\'' + escapeHtml(m.productName) + '\',\'' + escapeHtml(m.deviceType) + '\',\'' + (m.protocolType||'') + '\')">';
+                html += '<div class="msi-name">' + escapeHtml(m.productName) + '</div>';
+                html += '<div class="msi-brand">' + escapeHtml(m.brand) + ' <span class="msi-model">' + escapeHtml(m.modelCode) + '</span></div>';
+                html += '<div class="msi-desc">' + escapeHtml(m.description || '') + '</div>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+            container.style.display = 'block';
+        } catch(e) { console.error('Model search failed', e); }
+    }
+
+    function selectDeviceModel(id, brand, modelCode, productName, deviceType, protocolType) {
+        document.getElementById('modelSearchResults').style.display = 'none';
+        document.getElementById('modelSearchInput').value = productName;
+        document.getElementById('deviceName').value = productName;
+        document.getElementById('deviceModel').value = modelCode;
+
+        // Set brand
+        var brandSelect = document.getElementById('brand');
+        var customBrand = document.getElementById('customBrand');
+        var opts = Array.from(brandSelect.options).map(function(o){return o.value;});
+        if (opts.includes(brand)) { brandSelect.value = brand; customBrand.style.display = 'none'; }
+        else { brandSelect.value = '__custom__'; customBrand.style.display = 'block'; customBrand.value = brand; }
+
+        // Set device type
+        if (deviceType) { document.getElementById('deviceType').value = deviceType; }
+
+        // Set protocol
+        if (protocolType) { document.getElementById('protocolType').value = protocolType; }
+    }
+
+    function clearModelSearch() {
+        document.getElementById('modelSearchInput').value = '';
+        document.getElementById('modelSearchResults').style.display = 'none';
+        document.getElementById('modelSearchResults').innerHTML = '';
+    }
+
+    // ===== Device CRUD =====
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = '添加设备';
+        document.getElementById('deviceForm').reset();
+        document.getElementById('deviceId').value = '';
+        document.getElementById('customBrand').style.display = 'none';
+        document.getElementById('customBrand').value = '';
+        document.getElementById('brand').value = '';
+        document.getElementById('protocolType').value = '';
+        document.getElementById('ipAddress').value = '';
+        document.getElementById('port').value = '';
+        document.getElementById('externalDeviceId').value = '';
+        document.getElementById('deviceModel').value = '';
+        modalInstance.show();
+    }
+
+    async function editDevice(id) {
+        try {
+            const res = await fetch(API_BASE + '/' + id);
+            const device = await res.json();
+            document.getElementById('modalTitle').innerText = '编辑设备';
+            document.getElementById('deviceId').value = device.id;
+            document.getElementById('deviceName').value = device.deviceName;
+            document.getElementById('deviceType').value = device.deviceType;
+            document.getElementById('roomLocation').value = device.roomLocation;
+            document.getElementById('batteryLevel').value = device.batteryLevel || 100;
+            document.getElementById('status').value = device.status;
+            document.getElementById('protocolType').value = device.protocolType || '';
+            document.getElementById('ipAddress').value = device.ipAddress || '';
+            document.getElementById('port').value = device.port || '';
+            document.getElementById('externalDeviceId').value = device.externalDeviceId || '';
+            document.getElementById('deviceModel').value = device.model || '';
+
+            const brandSelect = document.getElementById('brand');
+            const customBrandInput = document.getElementById('customBrand');
+            const brandOptions = Array.from(brandSelect.options).map(function(o) { return o.value; });
+            if (brandOptions.includes(device.brand)) {
+                brandSelect.value = device.brand;
+                customBrandInput.style.display = 'none';
+            } else {
+                brandSelect.value = '__custom__';
+                customBrandInput.style.display = 'block';
+                customBrandInput.value = device.brand;
+            }
+            modalInstance.show();
+        } catch(e) { alert('加载设备详情失败'); }
+    }
+
+    async function saveDevice() {
+        const id = document.getElementById('deviceId').value;
+        const isEdit = !!id;
+        const brandSelect = document.getElementById('brand');
+        let brandValue = brandSelect.value;
+        if (brandValue === '__custom__') {
+            brandValue = document.getElementById('customBrand').value.trim();
+            if (!brandValue) { alert('请输入自定义品牌名称'); return; }
+        }
+        const roomLocation = document.getElementById('roomLocation').value.trim();
+        if (!roomLocation) { alert('房间位置不能为空'); return; }
+        const payload = {
+            deviceName: document.getElementById('deviceName').value,
+            brand: brandValue,
+            deviceType: document.getElementById('deviceType').value,
+            roomLocation: roomLocation,
+            batteryLevel: parseInt(document.getElementById('batteryLevel').value) || 100,
+            status: parseInt(document.getElementById('status').value),
+            protocolType: document.getElementById('protocolType').value || null,
+            ipAddress: document.getElementById('ipAddress').value || null,
+            port: parseInt(document.getElementById('port').value) || null,
+            externalDeviceId: document.getElementById('externalDeviceId').value || null,
+            model: document.getElementById('deviceModel').value || null,
+            createTime: new Date().toISOString()
+        };
+        if(isEdit) payload.id = parseInt(id);
+        const url = isEdit ? API_BASE + '/' + id : API_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                modalInstance.hide();
+                loadDevices();
+                loadLogs();
+                alert(isEdit ? '修改成功' : '添加成功');
+            } else {
+                const err = await res.json();
+                alert('操作失败: ' + (err.error || '未知错误'));
+            }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    async function deleteDevice(id) {
+        if(!confirm('确定删除吗？')) return;
+        try {
+            const res = await fetch(API_BASE + '/' + id, { method: 'DELETE' });
+            if (res.ok) { loadDevices(); loadLogs(); }
+            else { const err = await res.json(); alert('删除失败: ' + (err.error || '未知错误')); }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    // ===== Light Control =====
+    var lcDevice = null;
+
+    async function openLightControl(id) {
+        try {
+            const res = await fetch(API_BASE + '/' + id);
+            lcDevice = await res.json();
+            document.getElementById('lcDeviceId').value = id;
+            document.getElementById('lcDeviceName').textContent = lcDevice.deviceName;
+            document.getElementById('lcPowerToggle').checked = lcDevice.status === 1;
+            document.getElementById('lcBrightness').value = lcDevice.brightness || 100;
+            document.getElementById('lcBrightnessVal').textContent = (lcDevice.brightness || 100) + '%';
+            document.getElementById('lcColorTemp').value = lcDevice.colorTemp || 4000;
+            document.getElementById('lcColorTempVal').textContent = (lcDevice.colorTemp || 4000) + 'K';
+
+            if (lcDevice.rgbColor) {
+                var r = (lcDevice.rgbColor >> 16) & 0xFF;
+                var g = (lcDevice.rgbColor >> 8) & 0xFF;
+                var b = lcDevice.rgbColor & 0xFF;
+                var hex = '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
+                document.getElementById('lcRgbColor').value = hex;
+                document.getElementById('lcRgbPreview').style.background = hex;
+                document.getElementById('lcRgbVal').textContent = hex.toUpperCase();
+            }
+            document.getElementById('lcStatusMsg').textContent = '';
+            lightControlModalInstance.show();
+        } catch(e) { alert('加载设备信息失败'); }
+    }
+
+    async function sendLightCommand(action, extra) {
+        var id = document.getElementById('lcDeviceId').value;
+        var params = Object.assign({ action: action }, extra || {});
+        try {
+            var res = await fetch(API_BASE + '/' + id + '/control-light', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(params)
+            });
+            var result = await res.json();
+            if (!result.success) {
+                document.getElementById('lcStatusMsg').innerHTML = '<span class="text-danger">' + (result.error || '控制失败') + '</span>';
+            } else {
+                document.getElementById('lcStatusMsg').innerHTML = '<span class="text-success">指令已发送</span>';
+                loadDevices();
+            }
+        } catch(e) {
+            document.getElementById('lcStatusMsg').innerHTML = '<span class="text-danger">网络错误</span>';
+        }
+    }
+
+    function toggleLightPower() {
+        var on = document.getElementById('lcPowerToggle').checked;
+        sendLightCommand(on ? 'turn_on' : 'turn_off');
+    }
+    function updateBrightnessLabel(v) { document.getElementById('lcBrightnessVal').textContent = v + '%'; }
+    function updateColorTempLabel(v) { document.getElementById('lcColorTempVal').textContent = v + 'K'; }
+    function sendBrightness() { sendLightCommand('set_brightness', { brightness: parseInt(document.getElementById('lcBrightness').value) }); }
+    function sendColorTemp() { sendLightCommand('set_color_temp', { colorTemp: parseInt(document.getElementById('lcColorTemp').value) }); }
+    function sendRgbColor(hex) {
+        document.getElementById('lcRgbPreview').style.background = hex;
+        document.getElementById('lcRgbVal').textContent = hex.toUpperCase();
+        var r = parseInt(hex.slice(1,3), 16);
+        var g = parseInt(hex.slice(3,5), 16);
+        var b = parseInt(hex.slice(5,7), 16);
+        sendLightCommand('set_rgb', { r: r, g: g, b: b });
+    }
+
+    function setLightPreset(preset) {
+        switch(preset) {
+            case 'reading': sendLightCommand('set_brightness', {brightness: 80}); setTimeout(function(){sendLightCommand('set_color_temp', {colorTemp: 5000});}, 600); break;
+            case 'warm': sendLightCommand('set_color_temp', {colorTemp: 3000}); setTimeout(function(){sendLightCommand('set_brightness', {brightness: 60});}, 600); break;
+            case 'cool': sendLightCommand('set_color_temp', {colorTemp: 6500}); setTimeout(function(){sendLightCommand('set_brightness', {brightness: 100});}, 600); break;
+            case 'night': sendLightCommand('set_brightness', {brightness: 5}); setTimeout(function(){sendLightCommand('set_color_temp', {colorTemp: 2700});}, 600); break;
+        }
+    }
+
+    async function syncDeviceStatus() {
+        var id = document.getElementById('lcDeviceId').value;
+        document.getElementById('lcStatusMsg').innerHTML = '<i class="bi bi-arrow-repeat"></i> 正在同步...';
+        try {
+            var res = await fetch(API_BASE + '/' + id + '/live-status');
+            var data = await res.json();
+            if (data.success && data.source !== 'database') {
+                document.getElementById('lcStatusMsg').innerHTML = '<span class="text-success">已从设备同步状态</span>';
+                loadDevices();
+            } else if (data.success) {
+                document.getElementById('lcStatusMsg').innerHTML = '<span class="text-info">使用缓存数据 (设备未联网)</span>';
+            } else {
+                document.getElementById('lcStatusMsg').innerHTML = '<span class="text-danger">' + (data.error || '同步失败') + '</span>';
+            }
+        } catch(e) {
+            document.getElementById('lcStatusMsg').innerHTML = '<span class="text-danger">网络错误</span>';
+        }
+    }
+
+    // ===== Device Discovery =====
+    async function discoverDevices() {
+        var panel = document.getElementById('discoverPanel');
+        var statusEl = document.getElementById('discoverStatus');
+        var resultsEl = document.getElementById('discoverResults');
+        panel.style.display = 'block';
+        statusEl.textContent = '正在扫描局域网内的 Yeelight 设备，请稍候...';
+        resultsEl.innerHTML = '';
+        document.getElementById('discoverBtn').disabled = true;
+
+        try {
+            var res = await fetch(API_BASE + '/discover', { method: 'POST' });
+            var data = await res.json();
+            document.getElementById('discoverBtn').disabled = false;
+
+            if (data.count === 0) {
+                statusEl.textContent = '未发现设备。请确保 Yeelight 灯泡已连接 WiFi 并开启了局域网控制。';
+            } else {
+                statusEl.textContent = '发现 ' + data.count + ' 个设备：';
+                data.devices.forEach(function(d) {
+                    var powerLabel = d.power === 'on' ? '开启' : '关闭';
+                    var brightLabel = d.bright ? ' | 亮度: ' + d.bright + '%' : '';
+                    resultsEl.innerHTML +=
+                        '<div class="device-card">' +
+                        '<div class="device-info">' +
+                        '<strong>' + escapeHtml(d.name || d.model || 'Yeelight') + '</strong>' +
+                        '<div class="model">' + escapeHtml(d.ip) + ':' + escapeHtml(d.port) + ' | ' + escapeHtml(d.model || '未知型号') + ' | ' + powerLabel + brightLabel + '</div>' +
+                        '</div>' +
+                        '<button class="btn btn-sm btn-primary" onclick="importDiscoveredDevice(\'' + d.ip + '\',' + d.port + ',\'' + (d.model||'') + '\',\'' + (d.name||'') + '\',' + (d.power === 'on' ? 1 : 0) + ',' + (d.bright||100) + ',' + (d.ct||4000) + ')">' +
+                        '<i class="bi bi-plus-lg me-1"></i>添加</button></div>';
+                });
+            }
+        } catch(e) {
+            statusEl.textContent = '扫描失败: ' + e.message;
+            document.getElementById('discoverBtn').disabled = false;
+        }
+    }
+
+    function importDiscoveredDevice(ip, port, model, name, status, bright, ct) {
+        document.getElementById('modalTitle').innerText = '添加发现的设备';
+        document.getElementById('deviceForm').reset();
+        document.getElementById('deviceId').value = '';
+        document.getElementById('deviceName').value = name || 'Yeelight ' + ip;
+        document.getElementById('roomLocation').value = '待分配';
+        document.getElementById('brand').value = 'Yeelight';
+        document.getElementById('deviceType').value = 'Light';
+        document.getElementById('protocolType').value = 'YEELIGHT_LAN';
+        document.getElementById('ipAddress').value = ip;
+        document.getElementById('port').value = port || 55443;
+        document.getElementById('deviceModel').value = model || '';
+        document.getElementById('status').value = status ? '1' : '0';
+        document.getElementById('batteryLevel').value = 100;
+        closeDiscoverPanel();
+        modalInstance.show();
+    }
+
+    function closeDiscoverPanel() {
+        document.getElementById('discoverPanel').style.display = 'none';
+    }
+
+    // ===== Logs =====
+    async function loadLogs(p) {
+        if (p !== undefined) logPage = p;
+        try {
+            const res = await fetch(API_BASE + '/logs?page=' + logPage + '&size=' + PAGE_SIZE);
+            const result = await res.json();
+            const data = result.content;
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="bi bi-journal-x d-block"></i>暂无操作日志</td></tr>';
+                renderPagination('logPagination', result, 'loadLogs');
+                return;
+            }
+            const undoableCommands = ['CREATE_DEVICE', 'UPDATE_DEVICE', 'DELETE_DEVICE'];
+            data.forEach(function(log) {
+                const canUndo = undoableCommands.includes(log.command) && isAdmin();
+                tbody.innerHTML +=
+                    '<tr><td data-label="ID" class="text-secondary">#' + escapeHtml(log.id) + '</td>' +
+                    '<td data-label="设备ID">' + escapeHtml(log.deviceId) + '</td>' +
+                    '<td data-label="指令"><code class="bg-light px-2 py-1 rounded text-dark">' + escapeHtml(log.command) + '</code></td>' +
+                    '<td data-label="操作">' + (canUndo ? '<button class="btn btn-action" onclick="undoLog(' + log.id + ')"><i class="bi bi-arrow-counterclockwise"></i></button>' : '<span class="text-muted small">-</span>') + '</td>' +
+                    '<td data-label="参数">' + (escapeHtml(log.params) || '<span class="text-muted">-</span>') + '</td>' +
+                    '<td data-label="操作时间" class="text-secondary small">' + escapeHtml(log.operateTime.replace('T', ' ')) + '</td></tr>';
+            });
+            renderPagination('logPagination', result, 'loadLogs');
+        } catch (e) { console.log(e); }
+    }
+
+    async function undoLog(logId) {
+        if (!confirm('确定要撤销此操作吗？')) return;
+        try {
+            const res = await fetch(API_BASE + '/undo/' + logId, { method: 'POST' });
+            if (res.ok) { alert('撤销成功'); loadDevices(); loadLogs(); }
+            else { const err = await res.json(); alert('撤销失败: ' + (err.error || '未知错误')); }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    // ===== Users =====
+    function openAddUserModal() {
+        document.getElementById('userModalTitle').innerText = '添加用户';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        userModalInstance.show();
+    }
+
+    function editUser(user) {
+        document.getElementById('userModalTitle').innerText = '编辑用户';
+        document.getElementById('userId').value = user.id;
+        document.getElementById('username').value = user.username;
+        document.getElementById('userEmail').value = user.email;
+        document.getElementById('userRole').value = user.role || 'USER';
+        document.getElementById('userFamilyRole').value = user.familyRole || '';
+        document.getElementById('userPassword').value = '';
+        userModalInstance.show();
+    }
+
+    async function saveUser() {
+        const id = document.getElementById('userId').value;
+        const isEdit = !!id;
+        const password = document.getElementById('userPassword').value;
+        const payload = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('userEmail').value,
+            role: document.getElementById('userRole').value,
+            familyRole: document.getElementById('userFamilyRole').value || null,
+            createTime: new Date().toISOString()
+        };
+        if (password) payload.password = password;
+        if (isEdit) payload.id = parseInt(id);
+        const url = isEdit ? USER_BASE + '/' + id : USER_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) { userModalInstance.hide(); loadUsers(); alert(isEdit ? '修改成功' : '添加成功'); }
+            else { const err = await res.json(); alert('操作失败: ' + (err.error || '未知错误')); }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    async function loadUsers(p) {
+        if (p !== undefined) userPage = p;
+        try {
+            const res = await fetch(USER_BASE + '?page=' + userPage + '&size=' + PAGE_SIZE);
+            if (res.status === 403) {
+                document.getElementById('userTableBody').innerHTML = '<tr><td colspan="7" class="empty-state text-danger">无权限</td></tr>';
+                document.getElementById('userPagination').innerHTML = ''; return;
+            }
+            if (!res.ok) throw new Error('加载失败');
+            const result = await res.json();
+            const data = result.content;
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people d-block"></i>暂无用户</td></tr>';
+                renderPagination('userPagination', result, 'loadUsers'); return;
+            }
+            data.forEach(function(user) {
+                var time = user.createTime ? user.createTime.replace('T', ' ') : '未知';
+                var actions = isAdmin()
+                    ? '<div class="d-flex gap-1"><button class="btn btn-action" onclick=\'editUser(' + JSON.stringify(user) + ')\'><i class="bi bi-pencil"></i></button><button class="btn btn-action danger" onclick="deleteUser(' + user.id + ')"><i class="bi bi-trash3"></i></button></div>'
+                    : '<span class="text-muted small">只读</span>';
+                tbody.innerHTML += '<tr><td data-label="ID" class="text-secondary">#' + escapeHtml(user.id) + '</td><td data-label="用户名" class="fw-semibold">' + escapeHtml(user.username) + '</td><td data-label="邮箱">' + escapeHtml(user.email) + '</td><td data-label="角色"><span class="badge-role ' + (user.role === 'ADMIN' ? 'badge-admin' : 'badge-user') + '">' + (user.role === 'ADMIN' ? '管理员' : '普通用户') + '</span></td><td data-label="家庭身份">' + (user.familyRole ? escapeHtml(user.familyRole) : '<span class="text-muted">无</span>') + '</td><td data-label="创建时间" class="text-secondary small">' + escapeHtml(time) + '</td><td data-label="操作">' + actions + '</td></tr>';
+            });
+            renderPagination('userPagination', result, 'loadUsers');
+        } catch (e) { console.error("加载用户失败", e); }
+    }
+
+    async function deleteUser(id) {
+        if(!confirm('确定删除该用户吗？')) return;
+        try {
+            const res = await fetch(USER_BASE + '/' + id, { method: 'DELETE' });
+            if (res.ok) loadUsers();
+            else { const err = await res.json(); alert('删除失败: ' + (err.error || '未知错误')); }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    // ===== Notifications =====
+    async function loadNotifications(p) {
+        if (p !== undefined) notifPage = p;
+        try {
+            const res = await fetch(NOTIFICATION_API_BASE + '?page=' + notifPage + '&size=' + PAGE_SIZE);
+            if (!res.ok) throw new Error('HTTP error: ' + res.status);
+            const result = await res.json();
+            const data = result.content;
+            const tbody = document.getElementById('notificationTableBody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-bell-slash d-block"></i>暂无通知</td></tr>';
+                renderPagination('notificationPagination', result, 'loadNotifications'); return;
+            }
+            data.forEach(function(notif) {
+                var time = notif.createTime ? notif.createTime.replace('T', ' ') : '未知';
+                var isUnread = notif.isRead == 0;
+                var statusText = isUnread ? '未读' : '已读';
+                var badgeClass = isUnread ? 'badge-unread' : 'badge-read';
+                var statusIcon = isUnread ? 'bi-envelope-fill' : 'bi-envelope-open';
+                var actionBtn = isUnread && isAdmin()
+                    ? '<button class="btn btn-confirm" onclick="markAsRead(' + notif.id + ', this)"><i class="bi bi-check2 me-1"></i>确认</button>'
+                    : '<span class="text-muted small"><i class="bi bi-check-circle me-1"></i>' + (isUnread ? '待确认' : '已确认') + '</span>';
+                tbody.innerHTML += '<tr id="notif-row-' + notif.id + '" style="' + (isUnread ? 'background:#fafbff;' : '') + '">' +
+                    '<td data-label="ID" class="text-secondary">#' + escapeHtml(notif.id) + '</td>' +
+                    '<td data-label="用户ID">' + (escapeHtml(notif.userId) || '<span class="text-muted">系统</span>') + '</td>' +
+                    '<td data-label="设备ID">' + escapeHtml(notif.deviceId) + '</td>' +
+                    '<td data-label="消息内容" style="max-width:300px;">' + escapeHtml(notif.messageContent) + '</td>' +
+                    '<td data-label="状态"><span class="status-badge ' + badgeClass + '" id="notif-badge-' + notif.id + '"><i class="bi ' + statusIcon + '"></i> ' + escapeHtml(statusText) + '</span></td>' +
+                    '<td data-label="时间" class="text-secondary small">' + escapeHtml(time) + '</td>' +
+                    '<td data-label="操作">' + actionBtn + '</td></tr>';
+            });
+            renderPagination('notificationPagination', result, 'loadNotifications');
+        } catch (e) { console.error("加载消息失败", e); }
+    }
+
+    async function markAsRead(id, btnElement) {
+        try {
+            const res = await fetch(NOTIFICATION_API_BASE + '/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isRead: 1 }) });
+            if (res.ok || res.status === 204) {
+                var badge = document.getElementById('notif-badge-' + id);
+                if (badge) { badge.className = 'status-badge badge-read'; badge.innerHTML = '<i class="bi bi-envelope-open"></i> 已读'; }
+                var row = document.getElementById('notif-row-' + id);
+                if (row) row.style.background = '';
+                if (btnElement) {
+                    var span = document.createElement('span');
+                    span.className = 'text-muted small';
+                    span.innerHTML = '<i class="bi bi-check-circle me-1"></i>已确认';
+                    btnElement.parentNode.replaceChild(span, btnElement);
+                }
+            } else { alert('确认失败'); }
+        } catch (e) { alert('网络错误'); }
+    }
+
+    // ===== Tuya Import =====
+    async function openTuyaPanel() {
+        var panel = document.getElementById('tuyaPanel');
+        panel.style.display = 'block';
+        // Check platform status
+        try {
+            var res = await fetch(API_BASE + '/platform-status');
+            var data = await res.json();
+            var tuya = data.tuya;
+            var configPanel = document.getElementById('tuyaConfigStatus');
+            var configItems = document.getElementById('tuyaConfigItems');
+            configPanel.style.display = 'block';
+            configItems.innerHTML =
+                '<div class="config-item"><span class="config-dot ' + (tuya.configured ? 'ok' : 'missing') + '"></span> API 配置: ' + (tuya.configured ? '已配置' : '未配置') + '</div>' +
+                '<div class="config-item"><span class="config-dot ' + (tuya.hasUid ? 'ok' : 'missing') + '"></span> 用户 UID: ' + (tuya.hasUid ? '已设置' : '未设置 (需要配置 tuya.uid)') + '</div>' +
+                '<div class="config-item"><span class="config-dot ' + (tuya.hasValidToken ? 'ok' : 'missing') + '"></span> Token: ' + (tuya.hasValidToken ? '有效' : '未获取') + '</div>' +
+                '<div class="config-item text-muted" style="font-size:0.78rem"><i class="bi bi-info-circle me-1"></i>配置文件: src/main/resources/application.properties</div>';
+        } catch(e) {}
+    }
+
+    function closeTuyaPanel() {
+        document.getElementById('tuyaPanel').style.display = 'none';
+    }
+
+    async function importTuyaDevices() {
+        var statusEl = document.getElementById('tuyaImportStatus');
+        var resultsEl = document.getElementById('tuyaImportResults');
+        var btn = document.getElementById('tuyaImportBtn');
+        btn.disabled = true;
+        statusEl.innerHTML = '<i class="bi bi-arrow-repeat"></i> 正在从涂鸦平台导入设备...';
+        resultsEl.innerHTML = '';
+
+        try {
+            var res = await fetch(API_BASE + '/tuya/import', { method: 'POST' });
+            var data = await res.json();
+            btn.disabled = false;
+
+            if (!data.success) {
+                statusEl.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + (data.error || '导入失败') + '</span>';
+                return;
+            }
+
+            statusEl.innerHTML = '';
+            var summaryHtml = '<div class="import-summary">' +
+                '<div class="stat"><i class="bi bi-check-circle text-success"></i><span class="stat-value">' + (data.imported || 0) + '</span> 新导入</div>' +
+                '<div class="stat"><i class="bi bi-arrow-repeat text-primary"></i><span class="stat-value">' + (data.updated || 0) + '</span> 已更新</div>' +
+                '<div class="stat"><i class="bi bi-skip-forward text-secondary"></i><span class="stat-value">' + (data.skipped || 0) + '</span> 跳过</div>' +
+                '<div class="stat"><i class="bi bi-list-ol text-info"></i><span class="stat-value">' + (data.total || 0) + '</span> 总计</div>' +
+                '</div>';
+            resultsEl.innerHTML = summaryHtml;
+
+            if (data.devices && data.devices.length > 0) {
+                data.devices.forEach(function(d) {
+                    var badge = d.isNew
+                        ? '<span class="badge bg-success">新</span>'
+                        : '<span class="badge bg-primary">更新</span>';
+                    var onlineLabel = d.online
+                        ? '<span class="online-dot online"></span>在线'
+                        : '<span class="online-dot offline"></span>离线';
+                    resultsEl.innerHTML +=
+                        '<div class="import-card">' +
+                        '<div class="device-info">' +
+                        '<strong>' + badge + ' ' + escapeHtml(d.name) + '</strong>' +
+                        '<div class="category">' + escapeHtml(d.category) + ' | ' + escapeHtml(d.type) + ' | ' + onlineLabel + '</div>' +
+                        '</div>' +
+                        '<span class="text-secondary small">#' + escapeHtml(d.id) + '</span>' +
+                        '</div>';
+                });
+            }
+
+            if (data.imported > 0 || data.updated > 0) {
+                loadDevices(0);
+            }
+        } catch(e) {
+            statusEl.innerHTML = '<span class="text-danger">网络错误: ' + e.message + '</span>';
+            btn.disabled = false;
+        }
+    }
+
+    async function syncTuyaCategories() {
+        var btn = document.getElementById('tuyaSyncBtn');
+        var statusEl = document.getElementById('tuyaImportStatus');
+        btn.disabled = true;
+        statusEl.innerHTML = '<i class="bi bi-arrow-repeat"></i> 正在同步品类库...';
+
+        try {
+            var res = await fetch(API_BASE + '/tuya/sync-categories?fetchInstructions=true', { method: 'POST' });
+            var data = await res.json();
+            btn.disabled = false;
+
+            if (data.success) {
+                statusEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>已同步 ' + data.synced + '/' + data.total + ' 个品类</span>';
+                if (data.errors && data.errors.length > 0) {
+                    statusEl.innerHTML += '<div class="text-warning small mt-1">部分品类指令集获取失败: ' + data.errors.length + ' 个</div>';
+                }
+            } else {
+                statusEl.innerHTML = '<span class="text-danger">' + (data.error || '同步失败') + '</span>';
+            }
+        } catch(e) {
+            statusEl.innerHTML = '<span class="text-danger">网络错误</span>';
+            btn.disabled = false;
+        }
+    }
+
+    async function loadTuyaCategories() {
+        var browserEl = document.getElementById('tuyaCategoryBrowser');
+        var gridEl = document.getElementById('tuyaCategoryGrid');
+        browserEl.style.display = 'block';
+        gridEl.innerHTML = '<div class="text-muted small">加载中...</div>';
+
+        try {
+            var res = await fetch(API_BASE + '/tuya/categories');
+            var data = await res.json();
+
+            gridEl.innerHTML = '';
+            var categories;
+
+            if (data.source === 'builtin') {
+                // Built-in catalog format (object with code -> info)
+                categories = data.categories;
+                Object.keys(categories).forEach(function(code) {
+                    var cat = categories[code];
+                    gridEl.innerHTML += buildCategoryCard(code, cat.name, cat.nameEn, cat.icon, cat.description, 0);
+                });
+            } else {
+                // Database format (array of DeviceCatalog)
+                categories = data.categories;
+                categories.forEach(function(cat) {
+                    gridEl.innerHTML += buildCategoryCard(
+                        cat.categoryCode, cat.categoryName, cat.categoryNameEn,
+                        cat.icon, cat.description, cat.importedCount || 0
+                    );
+                });
+            }
+        } catch(e) {
+            gridEl.innerHTML = '<div class="text-danger small">加载品类失败</div>';
+        }
+    }
+
+    function buildCategoryCard(code, name, nameEn, icon, desc, count) {
+        var countHtml = count > 0 ? '<div class="cat-count"><i class="bi bi-check-circle me-1"></i>已导入 ' + count + ' 个设备</div>' : '';
+        return '<div class="category-card" onclick="showCategoryDetail(\'' + escapeHtml(code) + '\', \'' + escapeHtml(name||'') + '\')">' +
+            '<div class="cat-icon"><i class="bi ' + escapeHtml(icon || 'bi-cpu') + '"></i></div>' +
+            '<div class="cat-name">' + escapeHtml(name || code) + '</div>' +
+            '<div class="cat-name-en">' + escapeHtml(nameEn || '') + ' [' + escapeHtml(code) + ']</div>' +
+            '<div class="cat-desc">' + escapeHtml(desc || '') + '</div>' +
+            countHtml +
+            '</div>';
+    }
+
+    async function showCategoryDetail(code, name) {
+        document.getElementById('tcdTitle').textContent = (name || code) + ' (' + code + ')';
+        document.getElementById('tcdDescription').textContent = '';
+        document.getElementById('tcdFunctions').innerHTML = '<span class="text-muted"><i class="bi bi-arrow-repeat"></i> 加载中...</span>';
+        document.getElementById('tcdStatus').innerHTML = '<span class="text-muted"><i class="bi bi-arrow-repeat"></i> 加载中...</span>';
+        document.getElementById('tcdMeta').textContent = '';
+        tuyaCatDetailModalInstance.show();
+
+        try {
+            var res = await fetch(API_BASE + '/tuya/categories/' + code);
+            var data = await res.json();
+
+            if (data.success) {
+                document.getElementById('tcdDescription').textContent = data.description || '';
+
+                // Render functions
+                var funcEl = document.getElementById('tcdFunctions');
+                if (data.functions) {
+                    funcEl.innerHTML = renderInstructionTable(data.functions);
+                } else if (data.response) {
+                    try {
+                        var parsed = JSON.parse(data.response);
+                        if (parsed.result && parsed.result.functions) {
+                            funcEl.innerHTML = renderInstructionTable(parsed.result.functions);
+                        } else {
+                            funcEl.innerHTML = '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+                        }
+                    } catch(e) {
+                        funcEl.innerHTML = '<pre>' + data.response + '</pre>';
+                    }
+                } else {
+                    funcEl.innerHTML = '<span class="text-muted">暂无指令集数据 (请先同步品类库)</span>';
+                }
+
+                // Render status
+                var statusEl = document.getElementById('tcdStatus');
+                if (data.status) {
+                    statusEl.innerHTML = renderInstructionTable(data.status);
+                } else {
+                    statusEl.innerHTML = '<span class="text-muted">暂无状态集数据</span>';
+                }
+
+                // Meta info
+                var metaEl = document.getElementById('tcdMeta');
+                var metaParts = [];
+                metaParts.push('来源: ' + (data.source === 'database' ? '本地数据库' : 'API实时查询'));
+                if (data.importedCount) metaParts.push('已导入设备: ' + data.importedCount + ' 个');
+                if (data.lastSync) metaParts.push('最后同步: ' + data.lastSync.replace('T', ' '));
+                metaEl.textContent = metaParts.join(' | ');
+            } else {
+                document.getElementById('tcdFunctions').innerHTML = '<span class="text-danger">' + (data.error || '加载失败') + '</span>';
+                document.getElementById('tcdStatus').innerHTML = '';
+            }
+        } catch(e) {
+            document.getElementById('tcdFunctions').innerHTML = '<span class="text-danger">网络错误</span>';
+        }
+    }
+
+    function renderInstructionTable(items) {
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return '<span class="text-muted">暂无数据</span>';
+        }
+        var html = '<table class="table table-sm table-borderless mb-0" style="font-size:0.82rem">';
+        html += '<thead><tr><th>指令码</th><th>名称</th><th>类型</th><th>值范围</th></tr></thead><tbody>';
+        items.forEach(function(item) {
+            var code = item.code || '-';
+            var name = item.name || item.desc || '-';
+            var type = item.type || '-';
+            var range = '';
+            if (item.values) {
+                if (typeof item.values === 'object') {
+                    if (item.values.min !== undefined && item.values.max !== undefined) {
+                        range = item.values.min + ' ~ ' + item.values.max;
+                        if (item.values.step) range += ' (步长:' + item.values.step + ')';
+                        if (item.values.unit) range += ' ' + item.values.unit;
+                    } else if (item.values.range) {
+                        range = item.values.range.join(', ');
+                    } else {
+                        range = JSON.stringify(item.values);
+                    }
+                } else {
+                    range = String(item.values);
+                }
+            }
+            html += '<tr><td><code>' + escapeHtml(code) + '</code></td><td>' + escapeHtml(name) + '</td><td><span class="badge bg-light text-dark border">' + escapeHtml(type) + '</span></td><td class="text-secondary">' + escapeHtml(range) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+        return html;
+    }
+
+    // ===== Device Functions (for Tuya devices) =====
+    async function showTuyaFunctions(externalDeviceId) {
+        document.getElementById('tcdTitle').textContent = '设备指令集';
+        document.getElementById('tcdDescription').textContent = '设备ID: ' + externalDeviceId;
+        document.getElementById('tcdFunctions').innerHTML = '<span class="text-muted"><i class="bi bi-arrow-repeat"></i> 加载中...</span>';
+        document.getElementById('tcdStatus').innerHTML = '<span class="text-muted"><i class="bi bi-arrow-repeat"></i> 加载中...</span>';
+        document.getElementById('tcdMeta').textContent = '';
+        tuyaCatDetailModalInstance.show();
+
+        try {
+            var res = await fetch(API_BASE + '/tuya/' + externalDeviceId + '/functions');
+            var data = await res.json();
+            if (data.success) {
+                try {
+                    var parsed = JSON.parse(data.response);
+                    if (parsed.result && parsed.result.functions) {
+                        document.getElementById('tcdFunctions').innerHTML = renderInstructionTable(parsed.result.functions);
+                    } else {
+                        document.getElementById('tcdFunctions').innerHTML = '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+                    }
+                    if (parsed.result && parsed.result.status) {
+                        document.getElementById('tcdStatus').innerHTML = renderInstructionTable(parsed.result.status);
+                    }
+                } catch(e) {
+                    document.getElementById('tcdFunctions').innerHTML = '<pre>' + data.response + '</pre>';
+                }
+            } else {
+                document.getElementById('tcdFunctions').innerHTML = '<span class="text-danger">' + (data.error || '获取失败') + '</span>';
+            }
+        } catch(e) {
+            document.getElementById('tcdFunctions').innerHTML = '<span class="text-danger">网络错误</span>';
+        }
+    }
+</script>
+
+    <!-- Schedule Management Modal -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-clock-history me-2"></i><span id="schedTitle">定时任务管理</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <input type="hidden" id="schedDeviceId">
+                <div class="modal-body pt-2">
+                    <div id="schedDeviceName" class="text-secondary small mb-3"></div>
+
+                    <!-- Add New Schedule -->
+                    <div class="border rounded p-3 mb-3" style="background:#f8fafc;border-radius:12px;">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle me-1"></i>添加定时任务</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small">执行动作</label>
+                                <select class="form-select form-select-sm" id="schedAction">
+                                    <option value="turn_on">开机</option>
+                                    <option value="turn_off">关机</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">定时方式</label>
+                                <select class="form-select form-select-sm" id="schedType" onchange="toggleSchedType()">
+                                    <option value="ONCE_COUNTDOWN">倒计时</option>
+                                    <option value="ONCE_ABSOLUTE">指定时间</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4" id="schedCountdownGroup">
+                                <label class="form-label small">倒计时 (分钟)</label>
+                                <input type="number" class="form-control form-control-sm" id="schedCountdown" min="1" max="1440" value="30" placeholder="分钟数">
+                            </div>
+                            <div class="col-md-4" id="schedAbsoluteGroup" style="display:none;">
+                                <label class="form-label small">执行时间</label>
+                                <input type="datetime-local" class="form-control form-control-sm" id="schedDatetime">
+                            </div>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-end">
+                            <button class="btn btn-primary btn-sm" onclick="createSchedule()"><i class="bi bi-plus-lg me-1"></i>创建定时任务</button>
+                        </div>
+                        <div id="schedCreateMsg" class="small mt-2"></div>
+                    </div>
+
+                    <!-- Schedule List -->
+                    <h6 class="fw-bold"><i class="bi bi-list-ul me-1"></i>已有定时任务</h6>
+                    <div id="schedListContainer" style="max-height:300px;overflow-y:auto;">
+                        <div class="text-muted small text-center p-3">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Control Modal (multi-device type) -->
+    <div class="modal fade" id="deviceControlModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="dcTitle">控制面板</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <input type="hidden" id="dcDeviceId">
+                <div class="modal-body pt-2">
+                    <div class="text-center mb-3" id="dcOnlineStatus" style="font-size: 0.85rem; color: #64748b;"></div>
+
+                    <!-- Power Toggle (all types) -->
+                    <div class="mb-4">
+                        <button class="btn btn-lg w-100 btn-outline-danger" id="dcPowerBtn" style="border-radius: 12px; font-weight: 600;">
+                            <i class="bi bi-power"></i> 已关闭
+                        </button>
+                    </div>
+
+                    <!-- Light Panel -->
+                    <div class="dc-panel" id="dcPanel_Light" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">亮度: <span id="dcBrightVal">100</span>%</label>
+                            <input type="range" class="form-range" id="dcBrightSlider" min="1" max="100" value="100"
+                                   oninput="document.getElementById('dcBrightVal').innerText=this.value"
+                                   onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_brightness',{brightness:parseInt(this.value)})">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">色温: <span id="dcCtVal">4000</span>K</label>
+                            <input type="range" class="form-range" id="dcCtSlider" min="2700" max="6500" value="4000"
+                                   oninput="document.getElementById('dcCtVal').innerText=this.value"
+                                   onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_color_temp',{colorTemp:parseInt(this.value)})">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">RGB 颜色</label>
+                            <input type="color" class="form-control form-control-color" id="dcRgbPicker" value="#ffffff"
+                                   onchange="var h=this.value;var r=parseInt(h.slice(1,3),16);var g=parseInt(h.slice(3,5),16);var b=parseInt(h.slice(5,7),16);sendDeviceControl(document.getElementById('dcDeviceId').value,'set_rgb',{r:r,g:g,b:b})">
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_scene',{scene:'reading'})">阅读</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_scene',{scene:'movie'})">影院</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_scene',{scene:'night'})">夜灯</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_scene',{scene:'daylight'})">日光</button>
+                        </div>
+                    </div>
+
+                    <!-- Switch Panel -->
+                    <div class="dc-panel" id="dcPanel_Switch" style="display:none;">
+                        <div class="text-center p-4" style="background: #f8fafc; border-radius: 12px;">
+                            <i class="bi bi-toggle-on" style="font-size: 3rem; color: var(--primary-color);"></i>
+                            <p class="mt-2 mb-0 text-secondary">开关设备 — 使用上方电源按钮控制</p>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Panel -->
+                    <div class="dc-panel" id="dcPanel_Sensor" style="display:none;">
+                        <div class="text-center p-4" style="background: #f8fafc; border-radius: 12px;">
+                            <i class="bi bi-thermometer-half" style="font-size: 3rem; color: #059669;"></i>
+                            <p class="mt-2 mb-0 text-secondary">传感器设备 — 只读数据，通过实时状态接口查看</p>
+                            <button class="btn btn-sm btn-outline-primary mt-3" onclick="var id=document.getElementById('dcDeviceId').value;fetch(API_BASE+'/'+id+'/live-status').then(r=>r.json()).then(d=>{alert(JSON.stringify(d,null,2))}).catch(e=>alert('获取失败: '+e))">
+                                <i class="bi bi-arrow-clockwise me-1"></i>刷新实时数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fan Panel -->
+                    <div class="dc-panel" id="dcPanel_Fan" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">风速</label>
+                            <select class="form-select" id="dcFanSpeed" onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_fan_speed',{speed:this.value})">
+                                <option value="low">低速</option>
+                                <option value="mid" selected>中速</option>
+                                <option value="high">高速</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">模式</label>
+                            <select class="form-select" id="dcFanMode" onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_mode',{mode:this.value})">
+                                <option value="normal">普通风</option>
+                                <option value="natural">自然风</option>
+                                <option value="sleep">睡眠风</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Climate Panel -->
+                    <div class="dc-panel" id="dcPanel_Climate" style="display:none;">
+                        <div class="mb-3">
+                            <label class="form-label">目标温度: <span id="dcTempVal">26</span>°C</label>
+                            <input type="range" class="form-range" id="dcTempSlider" min="16" max="30" value="26"
+                                   oninput="document.getElementById('dcTempVal').innerText=this.value"
+                                   onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_temperature',{temperature:parseInt(this.value)})">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">运行模式</label>
+                            <select class="form-select" id="dcClimateMode" onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_mode',{mode:this.value})">
+                                <option value="auto">自动</option>
+                                <option value="cool">制冷</option>
+                                <option value="heat">制热</option>
+                                <option value="fan">送风</option>
+                                <option value="dry">除湿</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cover Panel -->
+                    <div class="dc-panel" id="dcPanel_Cover" style="display:none;">
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-outline-primary flex-fill" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'open_cover',{})"><i class="bi bi-arrow-up"></i> 打开</button>
+                            <button class="btn btn-outline-secondary flex-fill" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'stop_cover',{})"><i class="bi bi-pause"></i> 停止</button>
+                            <button class="btn btn-outline-primary flex-fill" onclick="sendDeviceControl(document.getElementById('dcDeviceId').value,'close_cover',{})"><i class="bi bi-arrow-down"></i> 关闭</button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">开合度: <span id="dcCoverVal">50</span>%</label>
+                            <input type="range" class="form-range" id="dcCoverPos" min="0" max="100" value="50"
+                                   oninput="document.getElementById('dcCoverVal').innerText=this.value"
+                                   onchange="sendDeviceControl(document.getElementById('dcDeviceId').value,'set_cover_position',{position:parseInt(this.value)})">
+                        </div>
+                    </div>
+                    <!-- Schedule button in control panel -->
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-center">
+                        <button class="btn btn-outline-info btn-sm" onclick="openScheduleFromControl()"><i class="bi bi-clock-history me-1"></i>定时任务管理</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var deviceControlModalInstance, scheduleModalInstance;
+    document.addEventListener('DOMContentLoaded', function() {
+        var dcModalEl = document.getElementById('deviceControlModal');
+        if (dcModalEl && typeof bootstrap !== 'undefined') {
+            deviceControlModalInstance = new bootstrap.Modal(dcModalEl);
+        }
+        var schedModalEl = document.getElementById('scheduleModal');
+        if (schedModalEl && typeof bootstrap !== 'undefined') {
+            scheduleModalInstance = new bootstrap.Modal(schedModalEl);
+        }
+    });
+
+    // ===== Schedule Management =====
+    var scheduleDeviceCache = null;
+
+    function toggleSchedType() {
+        var type = document.getElementById('schedType').value;
+        document.getElementById('schedCountdownGroup').style.display = type === 'ONCE_COUNTDOWN' ? '' : 'none';
+        document.getElementById('schedAbsoluteGroup').style.display = type === 'ONCE_ABSOLUTE' ? '' : 'none';
+    }
+
+    async function openSchedule(deviceId) {
+        try {
+            var res = await fetch(API_BASE + '/' + deviceId);
+            var device = await res.json();
+            scheduleDeviceCache = device;
+            document.getElementById('schedDeviceId').value = deviceId;
+            document.getElementById('schedTitle').textContent = device.deviceName + ' — 定时任务管理';
+            document.getElementById('schedDeviceName').textContent = '设备: ' + device.deviceName + ' | 类型: ' + device.deviceType + ' | 位置: ' + device.roomLocation;
+            document.getElementById('schedCreateMsg').textContent = '';
+            document.getElementById('schedAction').value = 'turn_off';
+            document.getElementById('schedType').value = 'ONCE_COUNTDOWN';
+            document.getElementById('schedCountdown').value = 30;
+            toggleSchedType();
+
+            // Set default datetime to 30 minutes from now
+            var future = new Date(Date.now() + 30 * 60000);
+            var dtStr = future.getFullYear() + '-' + String(future.getMonth()+1).padStart(2,'0') + '-' + String(future.getDate()).padStart(2,'0') + 'T' + String(future.getHours()).padStart(2,'0') + ':' + String(future.getMinutes()).padStart(2,'0');
+            document.getElementById('schedDatetime').value = dtStr;
+
+            loadSchedules(deviceId);
+            scheduleModalInstance.show();
+        } catch(e) {
+            alert('加载设备信息失败: ' + e.message);
+        }
+    }
+
+    function openScheduleFromControl() {
+        var deviceId = document.getElementById('dcDeviceId').value;
+        if (deviceId) {
+            deviceControlModalInstance.hide();
+            setTimeout(function() { openSchedule(parseInt(deviceId)); }, 300);
+        }
+    }
+
+    async function loadSchedules(deviceId) {
+        var container = document.getElementById('schedListContainer');
+        container.innerHTML = '<div class="text-muted small text-center p-3">加载中...</div>';
+        try {
+            var res = await fetch('/api/schedules/device/' + deviceId);
+            var schedules = await res.json();
+            if (schedules.length === 0) {
+                container.innerHTML = '<div class="text-muted small text-center p-3"><i class="bi bi-inbox d-block" style="font-size:2rem;"></i>暂无定时任务</div>';
+                return;
+            }
+            var html = '';
+            schedules.forEach(function(s) {
+                var actionLabel = s.action === 'turn_on' ? '开机' : '关机';
+                var actionColor = s.action === 'turn_on' ? 'success' : 'danger';
+                var actionIcon = s.action === 'turn_on' ? 'bi-power' : 'bi-power';
+
+                var timeLabel = '';
+                if (s.executeTime) {
+                    var dt = s.executeTime.replace('T', ' ');
+                    if (dt.length > 16) dt = dt.substring(0, 16);
+                    timeLabel = '<i class="bi bi-calendar-event me-1"></i>' + dt;
+                }
+
+                var typeLabel = '';
+                if (s.scheduleType === 'ONCE_COUNTDOWN') {
+                    typeLabel = '<span class="badge bg-info">倒计时 ' + (s.countdownMinutes || '?') + ' 分钟</span>';
+                } else {
+                    typeLabel = '<span class="badge bg-secondary">指定时间</span>';
+                }
+
+                var statusBadge = '';
+                if (s.executed) {
+                    statusBadge = '<span class="badge bg-light text-muted border">已执行</span>';
+                } else if (s.enabled) {
+                    statusBadge = '<span class="badge bg-success">等待中</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-light text-muted border">已禁用</span>';
+                }
+
+                var toggleBtn = '';
+                if (!s.executed) {
+                    var toggleIcon = s.enabled ? 'bi-pause-fill' : 'bi-play-fill';
+                    var toggleLabel = s.enabled ? '暂停' : '启用';
+                    toggleBtn = '<button class="btn btn-action" onclick="toggleScheduleItem(' + s.id + ')" title="' + toggleLabel + '"><i class="bi ' + toggleIcon + '"></i></button>';
+                }
+
+                html += '<div class="d-flex align-items-center justify-content-between p-2 mb-1 border rounded" style="font-size:0.85rem;">' +
+                    '<div class="d-flex align-items-center gap-2">' +
+                    '<i class="bi ' + actionIcon + ' text-' + actionColor + '"></i>' +
+                    '<span class="fw-semibold">' + actionLabel + '</span>' +
+                    typeLabel + ' ' +
+                    '<span class="text-secondary small">' + timeLabel + '</span>' +
+                    '</div>' +
+                    '<div class="d-flex align-items-center gap-1">' +
+                    statusBadge +
+                    toggleBtn +
+                    '<button class="btn btn-action danger" onclick="deleteScheduleItem(' + s.id + ')" title="删除"><i class="bi bi-trash3"></i></button>' +
+                    '</div></div>';
+            });
+            container.innerHTML = html;
+        } catch(e) {
+            container.innerHTML = '<div class="text-danger small text-center p-3">加载失败: ' + e.message + '</div>';
+        }
+    }
+
+    async function createSchedule() {
+        var deviceId = parseInt(document.getElementById('schedDeviceId').value);
+        var action = document.getElementById('schedAction').value;
+        var schedType = document.getElementById('schedType').value;
+        var msgEl = document.getElementById('schedCreateMsg');
+
+        var payload = {
+            deviceId: deviceId,
+            deviceName: scheduleDeviceCache ? scheduleDeviceCache.deviceName : '',
+            action: action,
+            scheduleType: schedType
+        };
+
+        if (schedType === 'ONCE_COUNTDOWN') {
+            var mins = parseInt(document.getElementById('schedCountdown').value);
+            if (!mins || mins < 1) {
+                msgEl.innerHTML = '<span class="text-danger">请输入有效的分钟数 (至少1分钟)</span>';
+                return;
+            }
+            payload.countdownMinutes = mins;
+        } else {
+            var dtVal = document.getElementById('schedDatetime').value;
+            if (!dtVal) {
+                msgEl.innerHTML = '<span class="text-danger">请选择执行时间</span>';
+                return;
+            }
+            payload.executeTime = dtVal;
+        }
+
+        msgEl.innerHTML = '<span class="text-info"><i class="bi bi-arrow-repeat"></i> 创建中...</span>';
+        try {
+            var res = await fetch('/api/schedules', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            var data = await res.json();
+            if (data.success) {
+                msgEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>定时任务创建成功！</span>';
+                document.getElementById('schedCountdown').value = 30;
+                loadSchedules(deviceId);
+            } else {
+                msgEl.innerHTML = '<span class="text-danger">创建失败: ' + (data.error || '未知错误') + '</span>';
+            }
+        } catch(e) {
+            msgEl.innerHTML = '<span class="text-danger">网络错误: ' + e.message + '</span>';
+        }
+    }
+
+    async function toggleScheduleItem(scheduleId) {
+        try {
+            var res = await fetch('/api/schedules/' + scheduleId + '/toggle', { method: 'PUT' });
+            var data = await res.json();
+            if (data.success) {
+                loadSchedules(parseInt(document.getElementById('schedDeviceId').value));
+            } else {
+                alert('操作失败: ' + (data.error || '未知错误'));
+            }
+        } catch(e) {
+            alert('网络错误: ' + e.message);
+        }
+    }
+
+    async function deleteScheduleItem(scheduleId) {
+        if (!confirm('确定删除此定时任务吗？')) return;
+        try {
+            var res = await fetch('/api/schedules/' + scheduleId, { method: 'DELETE' });
+            var data = await res.json();
+            if (data.success) {
+                loadSchedules(parseInt(document.getElementById('schedDeviceId').value));
+            } else {
+                alert('删除失败: ' + (data.error || '未知错误'));
+            }
+        } catch(e) {
+            alert('网络错误: ' + e.message);
+        }
+    }
+
+    // ===== Family Management =====
+    var createFamilyModalInstance, familyInfoModalInstance;
+
+    function openCreateFamilyModal() {
+        document.getElementById('familyNameInput').value = '';
+        document.getElementById('creatorRoleSelect').value = '';
+        document.getElementById('createFamilyMsg').textContent = '';
+        createFamilyModalInstance.show();
+    }
+
+    async function createFamily() {
+        var role = document.getElementById('creatorRoleSelect').value;
+        var name = document.getElementById('familyNameInput').value.trim();
+        var msgEl = document.getElementById('createFamilyMsg');
+
+        if (!role) {
+            msgEl.innerHTML = '<span class="text-danger">请选择您的家庭身份</span>';
+            return;
+        }
+
+        msgEl.innerHTML = '<span class="text-info"><i class="bi bi-arrow-repeat"></i> 创建中...</span>';
+        try {
+            var res = await fetch('/api/family/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ creatorRole: role, familyName: name || undefined })
+            });
+            var data = await res.json();
+            if (data.success) {
+                msgEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>创建成功！家庭码: <strong>' + data.family.familyCode + '</strong></span>';
+                setTimeout(function() {
+                    createFamilyModalInstance.hide();
+                    checkAuth();
+                }, 2000);
+            } else {
+                msgEl.innerHTML = '<span class="text-danger">' + (data.error || '创建失败') + '</span>';
+            }
+        } catch(e) {
+            msgEl.innerHTML = '<span class="text-danger">网络错误: ' + e.message + '</span>';
+        }
+    }
+
+    async function loadFamilyInfo() {
+        try {
+            var res = await fetch('/api/family/info');
+            var data = await res.json();
+            var display = document.getElementById('familyCodeDisplay');
+
+            if (data.hasFamily) {
+                display.style.display = '';
+                display.innerHTML = '<i class="bi bi-house me-1"></i>家庭码: <strong>' + data.family.familyCode + '</strong> (' + data.family.familyName + ')';
+            } else {
+                display.style.display = 'none';
+            }
+        } catch(e) {
+            console.log('Family info load error', e);
+        }
+    }
+
+    async function viewFamilyInfo() {
+        if (!familyInfoModalInstance) {
+            familyInfoModalInstance = new bootstrap.Modal(document.getElementById('familyInfoModal'));
+        }
+        familyInfoModalInstance.show();
+
+        var content = document.getElementById('familyInfoContent');
+        content.innerHTML = '<div class="text-center text-muted p-4">加载中...</div>';
+
+        try {
+            var res = await fetch('/api/family/info');
+            var data = await res.json();
+
+            if (!data.hasFamily) {
+                content.innerHTML = '<div class="text-center text-muted p-4"><i class="bi bi-house-x" style="font-size:3rem;"></i><p class="mt-2">您还没有创建或加入家庭</p></div>';
+                return;
+            }
+
+            var f = data.family;
+            var html = '<div class="mb-3 p-3" style="background:#f8fafc;border-radius:12px;">';
+            html += '<div class="d-flex justify-content-between align-items-center mb-2">';
+            html += '<h6 class="fw-bold mb-0"><i class="bi bi-house-fill me-1"></i>' + escapeHtml(f.familyName) + '</h6>';
+            html += '<button class="btn btn-sm btn-outline-primary" onclick="copyFamilyCode(\'' + f.familyCode + '\')"><i class="bi bi-clipboard me-1"></i>复制家庭码</button>';
+            html += '</div>';
+            html += '<div class="text-center p-3 mb-3" style="background:white;border-radius:8px;border:2px dashed var(--primary-color);">';
+            html += '<div class="text-secondary small mb-1">家庭码</div>';
+            html += '<div style="font-size:2rem;font-weight:700;letter-spacing:8px;color:var(--primary-color);">' + f.familyCode + '</div>';
+            html += '<div class="text-secondary small">分享此码给家人以加入家庭</div>';
+            html += '</div>';
+
+            html += '<h6 class="fw-bold mb-2"><i class="bi bi-people me-1"></i>家庭成员 (' + data.members.length + ')</h6>';
+            html += '<div class="list-group">';
+            data.members.forEach(function(m) {
+                var isCreator = m.id === f.creatorId;
+                html += '<div class="list-group-item d-flex justify-content-between align-items-center">';
+                html += '<div><strong>' + escapeHtml(m.username) + '</strong>';
+                if (isCreator) html += ' <span class="badge bg-primary ms-1">创建者</span>';
+                html += '</div>';
+                html += '<span class="badge bg-light text-dark border">' + (m.familyRole || '未设置') + '</span>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+            content.innerHTML = html;
+        } catch(e) {
+            content.innerHTML = '<div class="text-danger text-center p-4">加载失败: ' + e.message + '</div>';
+        }
+    }
+
+    function copyFamilyCode(code) {
+        navigator.clipboard.writeText(code).then(function() {
+            alert('家庭码已复制: ' + code);
+        }).catch(function() {
+            prompt('请手动复制家庭码:', code);
+        });
+    }
+
+</script>
+</body>
+</html>
